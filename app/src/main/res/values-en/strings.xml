@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Ahorra</string>
+
+    <string name="action_back">Back</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_ok">Got it</string>
+    <string name="action_create">Create goal</string>
+    <string name="action_confirm">Confirm</string>
+    <string name="action_continue">Continue</string>
+    <string name="action_save">Save</string>
+    <string name="action_delete">Delete</string>
+
+    <string name="home_new_goal">New goal</string>
+    <string name="home_empty_title">Start with your first goal</string>
+    <string name="home_empty_body">Choose how much you want to save, what for and by when. Ahorra works out your monthly contribution. Your data stays on this phone.</string>
+    <string name="home_progress">%1$d %% complete</string>
+    <string name="home_of_target">of %1$s</string>
+    <string name="home_status_completed">Goal reached!</string>
+    <string name="home_status_paused">Paused</string>
+    <string name="home_next_payment">Next contribution: %1$s on %2$s</string>
+    <string name="home_overdue">Pending: %1$s (was due on %2$s)</string>
+    <string name="home_estimated_end">Estimated completion: %1$s</string>
+    <string name="level_label">Level %1$d</string>
+    <string name="level_next">%1$d contributions to the next one</string>
+    <string name="level_max">Maximum level</string>
+    <string name="streak_label">Streak: %1$d months</string>
+    <string name="achievements_title">Achievements</string>
+
+    <string name="ach_first_goal">First goal created</string>
+    <string name="ach_first_contribution">First contribution</string>
+    <string name="ach_extra">Extra contribution</string>
+    <string name="ach_streak_3">3 months in a row saving</string>
+    <string name="ach_streak_6">6 months in a row saving</string>
+    <string name="ach_streak_12">12 months in a row saving</string>
+    <string name="ach_halfway">Halfway there</string>
+    <string name="ach_completed">Goal reached</string>
+
+    <string name="newgoal_title">New goal</string>
+    <string name="field_purpose">What are you saving for?</string>
+    <string name="field_currency">Currency</string>
+    <string name="field_target">Total amount (%1$s)</string>
+    <string name="field_months">Time frame in months</string>
+    <string name="field_day">Day of the month to contribute (1-31)</string>
+    <string name="newgoal_preview_monthly">Monthly contribution: %1$s</string>
+    <string name="newgoal_preview_end">You would finish on %1$s</string>
+    <string name="newgoal_hint">Ahorra only tracks your progress. It never moves money or charges you: you make the transfers from your bank and log them here.</string>
+
+    <string name="detail_remaining">You still need %1$s</string>
+    <string name="action_add_contribution">Log a contribution</string>
+    <string name="action_edit_plan">Change goal or time frame</string>
+    <string name="action_pause">Pause goal</string>
+    <string name="action_resume">Resume goal</string>
+    <string name="action_delete_goal">Delete goal</string>
+    <string name="detail_schedule_title">Contribution plan</string>
+    <string name="detail_installment">%1$s · %2$s</string>
+    <string name="detail_paid">covered</string>
+    <string name="detail_history_title">History</string>
+    <string name="detail_history_empty">You haven\'t logged any contributions yet.</string>
+    <string name="contribution_kind_extra">extra</string>
+    <string name="contribution_title">Log contribution</string>
+    <string name="contribution_amount">Amount (%1$s)</string>
+    <string name="contribution_note">Note (optional)</string>
+    <string name="contribution_extra">This is an extra contribution</string>
+    <string name="contribution_confirm_title">Confirm this contribution?</string>
+    <string name="contribution_confirm_body">You are about to log %1$s in “%2$s”. This only records it in the app: confirm that you have already made the transfer at your bank.</string>
+    <string name="delete_goal_title">Delete this goal?</string>
+    <string name="delete_goal_body">The goal and all its contributions will be erased from this phone. This cannot be undone.</string>
+    <string name="delete_contribution_title">Delete this contribution?</string>
+    <string name="delete_contribution_body">%1$s will be removed from your progress.</string>
+    <string name="edit_plan_hint">The plan will be recalculated from today over what you still need. What you have already saved does not change.</string>
+    <string name="celebration_title">You did it!</string>
+    <string name="celebration_body">You completed “%1$s”. Well done for staying consistent.</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_reminders">Reminders</string>
+    <string name="settings_reminders_toggle">Remind me when a contribution is due</string>
+    <string name="settings_reminder_hour">Approximate time: %1$d:00</string>
+    <string name="settings_reminder_note">Android may delay the reminder by a few minutes to save battery. You only get a reminder if a contribution is pending.</string>
+    <string name="settings_notifications_denied">Android is not allowing notifications. You can enable them in the system settings for this app.</string>
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_unlock_level">level %1$d</string>
+    <string name="accent_teal">Teal</string>
+    <string name="accent_indigo">Indigo</string>
+    <string name="accent_amber">Amber</string>
+    <string name="accent_rose">Rose</string>
+    <string name="settings_data">Your data</string>
+    <string name="settings_data_body">Everything is stored encrypted on this phone. There is no account and no server. You can export a copy to keep it or move it to another phone.</string>
+    <string name="settings_export">Export my data</string>
+    <string name="settings_export_ok">Copy exported. The file is not encrypted: keep it somewhere safe.</string>
+    <string name="settings_export_failed">The file could not be exported.</string>
+    <string name="settings_import">Import a copy</string>
+    <string name="settings_import_title">Replace your data?</string>
+    <string name="settings_import_body">Your current data will be replaced by the file\'s data. It is only imported if the file is valid.</string>
+    <string name="settings_import_confirm">Replace</string>
+    <string name="settings_import_ok">Data imported.</string>
+    <string name="settings_import_failed">The file is not valid or could not be read. Nothing has been changed.</string>
+    <string name="settings_wipe">Erase all my data</string>
+    <string name="settings_wipe_title">Erase all your data?</string>
+    <string name="settings_wipe_body">All goals, contributions and settings will be removed from this phone, along with the encryption key. This cannot be undone.</string>
+    <string name="settings_wipe_confirm">Erase everything</string>
+    <string name="settings_about">About Ahorra</string>
+    <string name="settings_about_body">Ahorra helps you keep track of your savings goals. It is not a financial institution, it does not hold money or make charges, and it contains no ads or trackers.</string>
+
+    <string name="unreadable_title">Your data can\'t be read</string>
+    <string name="unreadable_body">There is saved data but this phone cannot decrypt it (for example after restoring the phone). We have not deleted it. If you have an exported copy, you can start over and import it.</string>
+    <string name="unreadable_reset">Start over</string>
+
+    <string name="error_invalid_name">Write what you are saving for (60 characters maximum).</string>
+    <string name="error_invalid_target">The amount is not valid.</string>
+    <string name="error_invalid_months">The time frame must be between 1 and 600 months.</string>
+    <string name="error_invalid_day">The day must be between 1 and 31.</string>
+    <string name="error_invalid_amount">The amount is not valid.</string>
+    <string name="error_invalid_date">The date is not valid.</string>
+    <string name="error_goal_completed">This goal is already reached.</string>
+    <string name="error_storage">Could not save on the phone. Nothing was changed; please try again.</string>
+    <string name="error_generic">The operation could not be completed.</string>
+
+    <string name="notif_channel_name">Savings reminders</string>
+    <string name="notif_channel_desc">Reminders when a contribution of your plan is due</string>
+    <string name="notif_title">Time to save</string>
+    <string name="notif_text">%1$s left for “%2$s”.</string>
+    <string name="notif_text_many">You have pending contributions in %1$d goals.</string>
+    <string name="notif_public">You have a pending contribution.</string>
+</resources>

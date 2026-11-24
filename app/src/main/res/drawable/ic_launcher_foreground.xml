@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icono original: una hucha estilizada (círculo + ranura). Diseño propio, sin marcas de terceros. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M54,30 C67,30 77,40 77,52 C77,60 73,66 67,70 L67,76 L59,76 L59,73 C57.7,73.2 55.9,73.3 54,73.3 C52.1,73.3 50.3,73.2 49,73 L49,76 L41,76 L41,70 C35,66 31,60 31,52 C31,40 41,30 54,30 Z" />
+    <path
+        android:fillColor="#FF0F766E"
+        android:pathData="M48,41 L60,41 C61.1,41 62,41.9 62,43 C62,44.1 61.1,45 60,45 L48,45 C46.9,45 46,44.1 46,43 C46,41.9 46.9,41 48,41 Z" />
+</vector>

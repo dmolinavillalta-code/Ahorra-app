@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Ahorra</string>
+
+    <!-- Acciones comunes -->
+    <string name="action_back">Atrás</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_ok">Entendido</string>
+    <string name="action_create">Crear objetivo</string>
+    <string name="action_confirm">Confirmar</string>
+    <string name="action_continue">Continuar</string>
+    <string name="action_save">Guardar</string>
+    <string name="action_delete">Eliminar</string>
+
+    <!-- Inicio -->
+    <string name="home_new_goal">Nuevo objetivo</string>
+    <string name="home_empty_title">Empieza con tu primer objetivo</string>
+    <string name="home_empty_body">Elige cuánto quieres ahorrar, para qué y en cuánto tiempo. Ahorra calcula tu aportación mensual. Tus datos se quedan en este móvil.</string>
+    <string name="home_progress">%1$d %% completado</string>
+    <string name="home_of_target">de %1$s</string>
+    <string name="home_status_completed">¡Objetivo cumplido!</string>
+    <string name="home_status_paused">En pausa</string>
+    <string name="home_next_payment">Próxima aportación: %1$s el %2$s</string>
+    <string name="home_overdue">Pendiente: %1$s (debía hacerse el %2$s)</string>
+    <string name="home_estimated_end">Fecha estimada de finalización: %1$s</string>
+    <string name="level_label">Nivel %1$d</string>
+    <string name="level_next">%1$d aportaciones para el siguiente</string>
+    <string name="level_max">Nivel máximo</string>
+    <string name="streak_label">Racha: %1$d meses</string>
+    <string name="achievements_title">Logros</string>
+
+    <!-- Logros -->
+    <string name="ach_first_goal">Primer objetivo creado</string>
+    <string name="ach_first_contribution">Primera aportación</string>
+    <string name="ach_extra">Aportación extra</string>
+    <string name="ach_streak_3">3 meses seguidos ahorrando</string>
+    <string name="ach_streak_6">6 meses seguidos ahorrando</string>
+    <string name="ach_streak_12">12 meses seguidos ahorrando</string>
+    <string name="ach_halfway">Mitad del camino</string>
+    <string name="ach_completed">Objetivo cumplido</string>
+
+    <!-- Nuevo objetivo -->
+    <string name="newgoal_title">Nuevo objetivo</string>
+    <string name="field_purpose">¿Para qué quieres ahorrar?</string>
+    <string name="field_currency">Moneda</string>
+    <string name="field_target">Cantidad total (%1$s)</string>
+    <string name="field_months">Plazo en meses</string>
+    <string name="field_day">Día del mes para aportar (1-31)</string>
+    <string name="newgoal_preview_monthly">Aportación mensual: %1$s</string>
+    <string name="newgoal_preview_end">Terminarías el %1$s</string>
+    <string name="newgoal_hint">Ahorra solo registra tu progreso. No mueve dinero ni hace cargos: tú haces las transferencias desde tu banco y las anotas aquí.</string>
+
+    <!-- Detalle del objetivo -->
+    <string name="detail_remaining">Te faltan %1$s</string>
+    <string name="action_add_contribution">Anotar una aportación</string>
+    <string name="action_edit_plan">Cambiar objetivo o plazo</string>
+    <string name="action_pause">Pausar objetivo</string>
+    <string name="action_resume">Reanudar objetivo</string>
+    <string name="action_delete_goal">Eliminar objetivo</string>
+    <string name="detail_schedule_title">Plan de aportaciones</string>
+    <string name="detail_installment">%1$s · %2$s</string>
+    <string name="detail_paid">cubierta</string>
+    <string name="detail_history_title">Historial</string>
+    <string name="detail_history_empty">Todavía no has anotado ninguna aportación.</string>
+    <string name="contribution_kind_extra">extra</string>
+    <string name="contribution_title">Anotar aportación</string>
+    <string name="contribution_amount">Importe (%1$s)</string>
+    <string name="contribution_note">Nota (opcional)</string>
+    <string name="contribution_extra">Es una aportación extra</string>
+    <string name="contribution_confirm_title">¿Confirmas esta aportación?</string>
+    <string name="contribution_confirm_body">Vas a anotar %1$s en «%2$s». Esto solo lo registra en la app: confirma que ya has hecho la transferencia en tu banco.</string>
+    <string name="delete_goal_title">¿Eliminar este objetivo?</string>
+    <string name="delete_goal_body">Se borrarán el objetivo y todas sus aportaciones de este móvil. No se puede deshacer.</string>
+    <string name="delete_contribution_title">¿Eliminar esta aportación?</string>
+    <string name="delete_contribution_body">Se quitarán %1$s de tu progreso.</string>
+    <string name="edit_plan_hint">El plan se recalculará desde hoy sobre lo que aún te falta. Lo que ya has ahorrado no cambia.</string>
+    <string name="celebration_title">¡Lo has conseguido!</string>
+    <string name="celebration_body">Has completado «%1$s». Enhorabuena por tu constancia.</string>
+
+    <!-- Ajustes -->
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_reminders">Recordatorios</string>
+    <string name="settings_reminders_toggle">Avisarme cuando toque una aportación</string>
+    <string name="settings_reminder_hour">Hora aproximada: %1$d:00</string>
+    <string name="settings_reminder_note">Android puede retrasar el aviso unos minutos para ahorrar batería. Solo recibirás un aviso si hay una aportación pendiente.</string>
+    <string name="settings_notifications_denied">Android no permite mostrar notificaciones. Puedes activarlas en los ajustes del sistema para esta app.</string>
+    <string name="settings_appearance">Apariencia</string>
+    <string name="settings_unlock_level">nivel %1$d</string>
+    <string name="accent_teal">Turquesa</string>
+    <string name="accent_indigo">Índigo</string>
+    <string name="accent_amber">Ámbar</string>
+    <string name="accent_rose">Rosa</string>
+    <string name="settings_data">Tus datos</string>
+    <string name="settings_data_body">Todo se guarda cifrado en este móvil. No hay cuenta ni servidor. Puedes exportar una copia para guardarla o pasarla a otro móvil.</string>
+    <string name="settings_export">Exportar mis datos</string>
+    <string name="settings_export_ok">Copia exportada. El archivo no está cifrado: guárdalo en un lugar seguro.</string>
+    <string name="settings_export_failed">No se pudo exportar el archivo.</string>
+    <string name="settings_import">Importar una copia</string>
+    <string name="settings_import_title">¿Reemplazar tus datos?</string>
+    <string name="settings_import_body">Los datos actuales se sustituirán por los del archivo. Solo se importa si el archivo es válido.</string>
+    <string name="settings_import_confirm">Reemplazar</string>
+    <string name="settings_import_ok">Datos importados.</string>
+    <string name="settings_import_failed">El archivo no es válido o no se pudo leer. No se ha cambiado nada.</string>
+    <string name="settings_wipe">Borrar todos mis datos</string>
+    <string name="settings_wipe_title">¿Borrar todos tus datos?</string>
+    <string name="settings_wipe_body">Se eliminarán todos los objetivos, aportaciones y ajustes de este móvil, y la clave de cifrado. No se puede deshacer.</string>
+    <string name="settings_wipe_confirm">Borrar todo</string>
+    <string name="settings_about">Acerca de Ahorra</string>
+    <string name="settings_about_body">Ahorra te ayuda a llevar el control de tus objetivos de ahorro. No es una entidad financiera, no custodia dinero ni hace cargos, y no incluye publicidad ni rastreadores.</string>
+
+    <!-- Datos ilegibles -->
+    <string name="unreadable_title">No se pueden leer tus datos</string>
+    <string name="unreadable_body">Hay datos guardados pero este móvil no puede descifrarlos (por ejemplo, tras restaurar el móvil). No los hemos borrado. Si tienes una copia exportada, puedes empezar de nuevo e importarla.</string>
+    <string name="unreadable_reset">Empezar de nuevo</string>
+
+    <!-- Errores -->
+    <string name="error_invalid_name">Escribe para qué quieres ahorrar (máximo 60 caracteres).</string>
+    <string name="error_invalid_target">La cantidad no es válida.</string>
+    <string name="error_invalid_months">El plazo debe estar entre 1 y 600 meses.</string>
+    <string name="error_invalid_day">El día debe estar entre 1 y 31.</string>
+    <string name="error_invalid_amount">El importe no es válido.</string>
+    <string name="error_invalid_date">La fecha no es válida.</string>
+    <string name="error_goal_completed">Este objetivo ya está cumplido.</string>
+    <string name="error_storage">No se pudo guardar en el móvil. No se ha cambiado nada; inténtalo de nuevo.</string>
+    <string name="error_generic">No se pudo completar la operación.</string>
+
+    <!-- Notificaciones -->
+    <string name="notif_channel_name">Recordatorios de ahorro</string>
+    <string name="notif_channel_desc">Avisos cuando toca una aportación de tu plan</string>
+    <string name="notif_title">Toca ahorrar</string>
+    <string name="notif_text">Te quedan %1$s para «%2$s».</string>
+    <string name="notif_text_many">Tienes aportaciones pendientes en %1$d objetivos.</string>
+    <string name="notif_public">Tienes una aportación pendiente.</string>
+</resources>
