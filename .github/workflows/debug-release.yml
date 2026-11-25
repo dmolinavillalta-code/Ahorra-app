@@ -1,0 +1,36 @@
+name: APK de prueba (Release)
+
+# Compila el APK debug y lo publica como pre-release para descargarlo desde el móvil.
+# El APK debug está firmado con la clave de depuración: sirve para uso personal, NO para Google Play.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Compilar APK debug
+        run: ./gradlew :app:assembleDebug --stacktrace
+      - name: Publicar pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app/build/outputs/apk/debug/*.apk ahorra-debug.apk
+          SHA=$(sha256sum ahorra-debug.apk | cut -d' ' -f1)
+          gh release create "debug-${{ github.run_number }}" ahorra-debug.apk \
+            --prerelease \
+            --title "APK de prueba #${{ github.run_number }}" \
+            --notes "APK debug de Ahorra (commit ${GITHUB_SHA::7}). SHA-256: ${SHA}. Solo para uso personal; no es una versión firmada para Google Play."
