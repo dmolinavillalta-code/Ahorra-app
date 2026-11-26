@@ -70,6 +70,9 @@ fun SettingsScreen(data: AppState, vm: AhorraViewModel, onPinMode: (PinMode) -> 
     val level = Gamification.level(data.contributions.size).number
     val lock by vm.lockConfig.collectAsStateWithLifecycle()
     val biometricAvailable = remember { BiometricAuth.isAvailable(context) }
+    val promptTitle = stringResource(R.string.biometric_title)
+    val promptSubtitle = stringResource(R.string.biometric_subtitle)
+    val promptCancel = stringResource(R.string.action_cancel)
 
     var message by remember { mutableStateOf<Int?>(null) }
     var showWipe by remember { mutableStateOf(false) }
@@ -166,9 +169,9 @@ fun SettingsScreen(data: AppState, vm: AhorraViewModel, onPinMode: (PinMode) -> 
                             if (activity != null) {
                                 BiometricAuth.prompt(
                                     activity,
-                                    context.getString(R.string.biometric_title),
-                                    context.getString(R.string.biometric_subtitle),
-                                    context.getString(R.string.action_cancel),
+                                    promptTitle,
+                                    promptSubtitle,
+                                    promptCancel,
                                     onSuccess = { vm.setBiometric(true) },
                                     onFallback = {},
                                 )
