@@ -11,7 +11,7 @@ Ahorra es una aplicación para planificar y llevar el seguimiento de objetivos d
 no custodia dinero, no hace cargos ni transferencias.**
 
 ## 2. Qué datos se tratan y dónde
-Los datos que introduces (nombre de tus objetivos, cantidades, fechas, notas de aportaciones y ajustes) **se guardan
+Los datos que introduces (nombre de tus objetivos, cantidades, fechas, notas de aportaciones, el nombre con el que quieras que te salude la app, retos y ajustes) **se guardan
 únicamente en tu dispositivo**, cifrados. **No tenemos servidores que los reciban**, no hay cuentas de usuario y la app
 no tiene permiso de acceso a Internet. Por eso, el responsable no recibe ni accede a esos datos.
 
@@ -23,10 +23,10 @@ Prestarte las funciones de la app que has solicitado al instalarla y usarla (eje
 de recordatorio solo se activan si tú lo decides (consentimiento) y puedes desactivarlas cuando quieras.
 
 ## 4. Permisos
-Solo **notificaciones** (Android 13+), para los recordatorios, y únicamente si los activas.
+**Notificaciones** (Android 13+), para los recordatorios, y únicamente si los activas. **Biometría** (huella o rostro), si activas el desbloqueo biométrico: lo gestiona el sistema Android y la app no recibe ni almacena ningún dato biométrico.
 
 ## 5. Exportación y archivos
-Si usas "Exportar mis datos", se crea un archivo **sin cifrar** en la ubicación que elijas. Su custodia es tuya.
+Si exportas una copia, puedes protegerla con una contraseña (se cifra en tu móvil; no la conocemos y no se puede recuperar) o guardarla **sin cifrar**. El archivo se crea en la ubicación que elijas. Su custodia es tuya.
 Si lo compartes o lo almacenas en un servicio de terceros, ese tratamiento se rige por las condiciones de ese servicio.
 
 ## 6. Conservación y borrado
@@ -42,7 +42,7 @@ de Datos (www.aepd.es).
 [A DECIDIR CON ASESOR: edad mínima de uso y declaración en Google Play.]
 
 ## 9. Seguridad
-Cifrado AES-256-GCM con clave en el almacén seguro de Android. Ninguna medida es infalible: consulta los riesgos residuales
+Cifrado AES-256-GCM con clave en el almacén seguro de Android. Bloqueo opcional con PIN (guardado solo como hash con sal) y huella, y opción de ocultar el contenido en capturas. Ninguna medida es infalible: consulta los riesgos residuales
 en el documento técnico `THREAT_MODEL.md`.
 
 ## 10. Cambios

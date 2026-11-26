@@ -22,6 +22,17 @@
 | 13 | Intents maliciosos | Una sola actividad exportada (launcher) que no procesa extras ni datos externos | — |
 | 14 | Ingeniería social con una "app de ahorro" que imita un banco | La UI no imita interfaces bancarias; el texto aclara que la app no mueve dinero | — |
 
+## Fase 2: bloqueo, copias cifradas y retos
+| Amenaza | Mitigación | Riesgo residual |
+|---|---|---|
+| Alguien coge el móvil desbloqueado | PIN de 6 dígitos (rechaza PIN triviales), huella/rostro opcional (BIOMETRIC_STRONG), bloqueo al salir (inmediato/30 s/5 min), arranque siempre bloqueado | El PIN es una barrera de interfaz: no es lo que cifra el archivo (lo hace la clave del Keystore) |
+| Adivinar el PIN a base de intentos | PBKDF2 con sal; bloqueo progresivo (cada 5 fallos: 30 s, doblando hasta 15 min) guardado cifrado | Se basa en el reloj del sistema: adelantarlo lo acorta. Con un móvil con root se puede saltar la interfaz |
+| Capturas y vista previa en apps recientes | Opción "Ocultar contenido" (`FLAG_SECURE`) | Es opcional; una cámara externa sigue pudiendo fotografiar la pantalla |
+| Copia exportada robada | Exportación cifrada con contraseña (mínimo 8 caracteres, PBKDF2 210.000 + AES-GCM, cabecera autenticada) | Una contraseña débil se puede adivinar sin límite fuera del móvil; la contraseña olvidada no se recupera |
+| Copia sin cifrar | Aviso explícito antes de guardarla | Decisión de la persona |
+| Archivo de importación manipulado | Validación completa (`sanitizeImport`), tamaño máximo 10 MB, rechazo si algo no cuadra | — |
+| Presión psicológica de la gamificación | Sin dinero, sin azar, sin castigos; retos opcionales y sin consecuencia; romper una racha no quita nada | — |
+
 ## Detección y respuesta a incidentes
 Con arquitectura sin servidor no hay un sistema que monitorizar. Procedimiento si se detecta una vulnerabilidad:
 1. Recepción por el correo de contacto de la ficha de Play. 2. Triaje en 72 h. 3. Corrección y publicación de actualización
@@ -29,6 +40,7 @@ Con arquitectura sin servidor no hay un sistema que monitorizar. Procedimiento s
 afectados fuera del dispositivo (no aplica en v1), notificación a la AEPD en 72 h y a los afectados según RGPD art. 33-34.
 
 ## Lo que **no** se ha hecho
+- Pruebas automáticas de `LockStore`/`LockController` (la lógica de PIN y bloqueo sí está probada en `core`; la capa Android no).
 - Pruebas de penetración (requieren la app compilada y un tester humano; obligatorias antes del lanzamiento).
 - Análisis estático/dinámico de la app (lint se ejecutará en CI; ver `LAUNCH_CHECKLIST.md`).
 - Revisión de seguridad independiente del código.

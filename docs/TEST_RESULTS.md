@@ -3,7 +3,10 @@
 Fecha de ejecución: 2026-11-22. Entorno: contenedor Linux, OpenJDK 21, Kotlin 2.4.21 (compilador descargado de GitHub Releases).
 Comando reproducible: `./tools/run_jvm_tests.sh`.
 
-## Ejecutado: 43 pruebas, 0 fallos
+## Ejecutado (fase 2): 72 pruebas, 0 fallos
+Fecha: 2026-11-26. Las 43 de la fase 1 más 29 nuevas: `SummaryAndSeriesTest` (totales por moneda sin mezclar divisas, serie real/plan), `ChallengesAndAchievementsTest` (retos, nuevos logros), `SecurityCryptoTest` (cifrado con contraseña, PIN, bloqueo progresivo) y `LedgerPhase2Test` (iconos, nombre, retos, importación). La app Android de la fase 2 se compila, pasa lint y pruebas unitarias en CI (GitHub Actions); la interfaz **no** se ha probado a mano en un dispositivo real.
+
+Detalle de la fase 1 (43 pruebas):
 
 | Suite | Pruebas | Qué cubre |
 |---|---|---|
