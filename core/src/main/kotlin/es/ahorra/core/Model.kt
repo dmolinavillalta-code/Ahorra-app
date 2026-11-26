@@ -8,11 +8,22 @@ enum class ContributionKind { REGULAR, EXTRA }
 
 /** Colores de acento. Los desbloqueables son solo cosméticos y se obtienen por constancia (nivel). */
 enum class Accent(val unlockLevel: Int) {
-    TEAL(1), INDIGO(2), AMBER(3), ROSE(4);
+    TEAL(1), INDIGO(2), AMBER(3), ROSE(4), EMERALD(5), VIOLET(6);
 
     companion object {
         fun unlockedAt(level: Int): List<Accent> = entries.filter { it.unlockLevel <= level }
     }
+}
+
+/** Iconos disponibles para un objetivo. La interfaz traduce cada clave a un dibujo. */
+object GoalIcons {
+    const val DEFAULT = "target"
+    val all: List<String> = listOf(
+        "target", "phone", "plane", "car", "home", "laptop", "gift", "heart",
+        "school", "ring", "bike", "shield", "music", "game", "sun",
+    )
+
+    fun isValid(key: String): Boolean = key in all
 }
 
 object Limits {
@@ -20,9 +31,11 @@ object Limits {
     const val MAX_CONTRIBUTION_MINOR = 100_000_000_000L
     const val MAX_MONTHS = 600
     const val MAX_NAME = 60
+    const val MAX_DISPLAY_NAME = 30
     const val MAX_NOTE = 140
     const val MAX_GOALS = 100
     const val MAX_CONTRIBUTIONS = 20_000
+    const val MAX_CHALLENGES = 240
     val MIN_DATE: LocalDate = LocalDate.of(2000, 1, 1)
 }
 
@@ -43,6 +56,7 @@ data class Goal(
     val pausedSince: LocalDate? = null,
     /** Meses (formato yyyy-MM) en los que el objetivo estuvo en pausa; no rompen la racha. */
     val pausedMonths: List<String> = emptyList(),
+    val icon: String = GoalIcons.DEFAULT,
 )
 
 /** Solo existen aportaciones CONFIRMADAS por la persona: lo pendiente o simulado nunca se guarda como ahorro. */
@@ -59,13 +73,20 @@ data class Settings(
     val remindersEnabled: Boolean = false,
     val reminderHour: Int = 9,
     val accent: Accent = Accent.TEAL,
+    /** Cómo quiere la persona que la llame la app. Solo se guarda en el móvil. */
+    val displayName: String = "",
+    val welcomeSeen: Boolean = false,
 )
+
+/** Reto personal voluntario aceptado para un mes concreto (formato yyyy-MM). */
+data class ActiveChallenge(val challengeId: String, val month: String)
 
 data class AppState(
     val version: Int = CURRENT_VERSION,
     val goals: List<Goal> = emptyList(),
     val contributions: List<Contribution> = emptyList(),
     val settings: Settings = Settings(),
+    val challenges: List<ActiveChallenge> = emptyList(),
 ) {
     companion object {
         const val CURRENT_VERSION = 1

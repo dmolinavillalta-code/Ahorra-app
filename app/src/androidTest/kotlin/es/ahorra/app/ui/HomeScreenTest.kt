@@ -30,10 +30,10 @@ class HomeScreenTest {
     fun emptyStateInvitesToCreateAGoal() {
         var newGoalClicks = 0
         rule.setContent {
-            AhorraTheme { HomeScreen(AppState(), onOpenGoal = {}, onNewGoal = { newGoalClicks++ }, onSettings = {}) }
+            AhorraTheme { HomeScreen(AppState(), onOpenGoal = {}, onNewGoal = { newGoalClicks++ }) }
         }
         rule.onNodeWithText(text(R.string.home_empty_title)).assertExists()
-        rule.onNodeWithText(text(R.string.home_new_goal)).performClick()
+        rule.onNodeWithText("＋  " + text(R.string.home_new_goal)).performClick()
         assertTrue(newGoalClicks == 1)
     }
 
@@ -49,7 +49,7 @@ class HomeScreenTest {
             contributions = listOf(Contribution("c1", "g1", 50_000, today)),
         )
         rule.setContent {
-            AhorraTheme { HomeScreen(state, onOpenGoal = {}, onNewGoal = {}, onSettings = {}) }
+            AhorraTheme { HomeScreen(state, onOpenGoal = {}, onNewGoal = {}) }
         }
         rule.onNodeWithText("Viaje").assertExists()
         // 500 de 3.000 => 16 % (enteros, sin redondeo hacia arriba).

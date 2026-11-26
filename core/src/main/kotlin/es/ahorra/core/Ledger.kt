@@ -6,7 +6,7 @@ import java.time.YearMonth
 enum class Reason {
     INVALID_NAME, INVALID_TARGET, INVALID_MONTHS, INVALID_DAY, INVALID_CURRENCY,
     INVALID_AMOUNT, INVALID_DATE, INVALID_SETTINGS, UNKNOWN_GOAL, GOAL_COMPLETED,
-    LIMIT_REACHED, NOT_READY, STORAGE_ERROR,
+    LIMIT_REACHED, NOT_READY, STORAGE_ERROR, INVALID_ICON, INVALID_CHALLENGE,
 }
 
 sealed interface LedgerResult {
@@ -29,6 +29,7 @@ object Ledger {
         if (state.goals.size >= Limits.MAX_GOALS) return LedgerResult.Rejected(Reason.LIMIT_REACHED)
         validateGoalFields(goal.name, goal.targetMinor, goal.currencyCode, goal.months, goal.paymentDay)
             ?.let { return LedgerResult.Rejected(it) }
+        if (!GoalIcons.isValid(goal.icon)) return LedgerResult.Rejected(Reason.INVALID_ICON)
         val clean = goal.copy(
             name = goal.name.trim(),
             planBaseSavedMinor = 0,
@@ -72,13 +73,16 @@ object Ledger {
         months: Int,
         paymentDay: Int,
         today: LocalDate,
+        icon: String? = null,
     ): LedgerResult {
         val goal = state.goals.firstOrNull { it.id == goalId } ?: return LedgerResult.Rejected(Reason.UNKNOWN_GOAL)
         validateGoalFields(name, targetMinor, goal.currencyCode, months, paymentDay)
             ?.let { return LedgerResult.Rejected(it) }
+        if (icon != null && !GoalIcons.isValid(icon)) return LedgerResult.Rejected(Reason.INVALID_ICON)
         val saved = savedMinor(state, goalId)
         val updated = goal.copy(
             name = name.trim(),
+            icon = icon ?: goal.icon,
             targetMinor = targetMinor,
             months = months,
             paymentDay = paymentDay,
@@ -135,13 +139,33 @@ object Ledger {
         )
     }
 
-    fun updateSettings(state: AppState, settings: Settings): LedgerResult {
+    fun updateSettings(state: AppState, requested: Settings): LedgerResult {
+        val settings = requested.copy(displayName = requested.displayName.trim())
         if (settings == state.settings) return LedgerResult.Ok(state, changed = false)
         val level = Gamification.level(state.contributions.size).number
-        if (settings.reminderHour !in 0..23 || settings.accent.unlockLevel > level) {
+        if (settings.reminderHour !in 0..23 ||
+            settings.accent.unlockLevel > level ||
+            settings.displayName.length > Limits.MAX_DISPLAY_NAME
+        ) {
             return LedgerResult.Rejected(Reason.INVALID_SETTINGS)
         }
         return LedgerResult.Ok(state.copy(settings = settings))
+    }
+
+    /** Acepta un reto voluntario para el mes de [today]. Aceptarlo dos veces no hace nada. */
+    fun acceptChallenge(state: AppState, challengeId: String, today: LocalDate): LedgerResult {
+        if (ChallengeType.fromId(challengeId) == null) return LedgerResult.Rejected(Reason.INVALID_CHALLENGE)
+        val entry = ActiveChallenge(challengeId, YearMonth.from(today).toString())
+        if (entry in state.challenges) return LedgerResult.Ok(state, changed = false)
+        if (state.challenges.size >= Limits.MAX_CHALLENGES) return LedgerResult.Rejected(Reason.LIMIT_REACHED)
+        return LedgerResult.Ok(state.copy(challenges = state.challenges + entry))
+    }
+
+    /** Abandona un reto sin ninguna consecuencia. */
+    fun dismissChallenge(state: AppState, challengeId: String, month: String): LedgerResult {
+        val entry = ActiveChallenge(challengeId, month)
+        if (entry !in state.challenges) return LedgerResult.Ok(state, changed = false)
+        return LedgerResult.Ok(state.copy(challenges = state.challenges - entry))
     }
 
     /**
@@ -157,6 +181,7 @@ object Ledger {
             if (g.id.isBlank() || g.id.length > 64) return null
             if (validateGoalFields(g.name, g.targetMinor, g.currencyCode, g.months, g.paymentDay) != null) return null
             if (g.planBaseSavedMinor < 0 || g.planBaseSavedMinor > Limits.MAX_TARGET_MINOR) return null
+            if (!GoalIcons.isValid(g.icon)) return null
         }
         val goalIds = candidate.goals.map { it.id }.toSet()
         for (c in candidate.contributions) {
@@ -167,6 +192,12 @@ object Ledger {
             if (c.note.length > Limits.MAX_NOTE) return null
         }
         if (candidate.settings.reminderHour !in 0..23) return null
+        if (candidate.settings.displayName.length > Limits.MAX_DISPLAY_NAME) return null
+        if (candidate.challenges.size > Limits.MAX_CHALLENGES || candidate.challenges.toSet().size != candidate.challenges.size) return null
+        for (ch in candidate.challenges) {
+            if (ChallengeType.fromId(ch.challengeId) == null) return null
+            if (runCatching { YearMonth.parse(ch.month) }.isFailure) return null
+        }
         // El estado de cada objetivo se recalcula a partir de sus aportaciones, no se confía en el archivo.
         return candidate.goals.fold(candidate) { acc, g -> refreshStatus(acc, g.id) }
     }

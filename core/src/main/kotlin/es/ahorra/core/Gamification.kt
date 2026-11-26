@@ -9,7 +9,8 @@ data class StreakInfo(val current: Int, val best: Int)
 data class Level(val number: Int, val contributionsToNext: Int?)
 
 enum class Achievement {
-    FIRST_GOAL, FIRST_CONTRIBUTION, EXTRA_CONTRIBUTION, STREAK_3, STREAK_6, STREAK_12, HALFWAY, GOAL_COMPLETED
+    FIRST_GOAL, FIRST_CONTRIBUTION, EXTRA_CONTRIBUTION, STREAK_3, STREAK_6, STREAK_12,
+    PERCENT_25, HALFWAY, PERCENT_75, GOAL_COMPLETED, TEN_CONTRIBUTIONS, TWO_GOALS, CHALLENGE_DONE
 }
 
 /**
@@ -19,6 +20,13 @@ enum class Achievement {
 object Gamification {
 
     private val levelThresholds = listOf(0, 1, 3, 6, 12, 24, 48, 96)
+
+    /** Avance (0..1) dentro del nivel actual hacia el siguiente; 1 en el nivel máximo. */
+    fun levelFraction(confirmedContributions: Int): Float {
+        val index = levelThresholds.indexOfLast { confirmedContributions >= it }
+        val next = levelThresholds.getOrNull(index + 1) ?: return 1f
+        return (confirmedContributions - levelThresholds[index]).toFloat() / (next - levelThresholds[index])
+    }
 
     fun level(confirmedContributions: Int): Level {
         val number = levelThresholds.indexOfLast { confirmedContributions >= it } + 1
@@ -61,9 +69,14 @@ object Gamification {
         if (best >= 3) result.add(Achievement.STREAK_3)
         if (best >= 6) result.add(Achievement.STREAK_6)
         if (best >= 12) result.add(Achievement.STREAK_12)
-        if (state.goals.any { it.targetMinor > 0 && Ledger.savedMinor(state, it.id) * 2 >= it.targetMinor }) {
-            result.add(Achievement.HALFWAY)
-        }
+        fun reached(numerator: Long, denominator: Long) =
+            state.goals.any { it.targetMinor > 0 && Ledger.savedMinor(state, it.id) * denominator >= it.targetMinor * numerator }
+        if (reached(1, 4)) result.add(Achievement.PERCENT_25)
+        if (reached(1, 2)) result.add(Achievement.HALFWAY)
+        if (reached(3, 4)) result.add(Achievement.PERCENT_75)
+        if (state.contributions.size >= 10) result.add(Achievement.TEN_CONTRIBUTIONS)
+        if (state.goals.size >= 2) result.add(Achievement.TWO_GOALS)
+        if (Challenges.completedCount(state) > 0) result.add(Achievement.CHALLENGE_DONE)
         if (state.goals.any { it.status == GoalStatus.COMPLETED }) result.add(Achievement.GOAL_COMPLETED)
         return result
     }

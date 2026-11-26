@@ -5,6 +5,7 @@ local.properties
 .idea/
 *.jks
 *.keystore
+!app/ahorra-debug.keystore
 *.aab
 *.apk
 .kotlin/

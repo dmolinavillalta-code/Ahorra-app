@@ -1,6 +1,8 @@
 package es.ahorra.app.data
 
 import es.ahorra.core.Accent
+import es.ahorra.core.ActiveChallenge
+import es.ahorra.core.GoalIcons
 import es.ahorra.core.AppState
 import es.ahorra.core.Contribution
 import es.ahorra.core.ContributionKind
@@ -28,6 +30,7 @@ data class GoalDto(
     val status: String = "ACTIVE",
     val pausedSince: String? = null,
     val pausedMonths: List<String> = emptyList(),
+    val icon: String = GoalIcons.DEFAULT,
 )
 
 @Serializable
@@ -45,7 +48,12 @@ data class SettingsDto(
     val remindersEnabled: Boolean = false,
     val reminderHour: Int = 9,
     val accent: String = "TEAL",
+    val displayName: String = "",
+    val welcomeSeen: Boolean = false,
 )
+
+@Serializable
+data class ChallengeDto(val challengeId: String, val month: String)
 
 @Serializable
 data class StateDto(
@@ -53,6 +61,7 @@ data class StateDto(
     val goals: List<GoalDto> = emptyList(),
     val contributions: List<ContributionDto> = emptyList(),
     val settings: SettingsDto = SettingsDto(),
+    val challenges: List<ChallengeDto> = emptyList(),
 )
 
 object StorageFormat {
@@ -83,7 +92,7 @@ internal fun AppState.toDto() = StateDto(
             id = it.id, name = it.name, targetMinor = it.targetMinor, currencyCode = it.currencyCode,
             startDate = it.startDate.toString(), months = it.months, paymentDay = it.paymentDay,
             planBaseSavedMinor = it.planBaseSavedMinor, status = it.status.name,
-            pausedSince = it.pausedSince?.toString(), pausedMonths = it.pausedMonths,
+            pausedSince = it.pausedSince?.toString(), pausedMonths = it.pausedMonths, icon = it.icon,
         )
     },
     contributions = contributions.map {
@@ -92,7 +101,11 @@ internal fun AppState.toDto() = StateDto(
             kind = it.kind.name, note = it.note,
         )
     },
-    settings = SettingsDto(settings.remindersEnabled, settings.reminderHour, settings.accent.name),
+    settings = SettingsDto(
+        settings.remindersEnabled, settings.reminderHour, settings.accent.name,
+        settings.displayName, settings.welcomeSeen,
+    ),
+    challenges = challenges.map { ChallengeDto(it.challengeId, it.month) },
 )
 
 internal fun StateDto.toDomain() = AppState(
@@ -102,7 +115,7 @@ internal fun StateDto.toDomain() = AppState(
             id = it.id, name = it.name, targetMinor = it.targetMinor, currencyCode = it.currencyCode,
             startDate = LocalDate.parse(it.startDate), months = it.months, paymentDay = it.paymentDay,
             planBaseSavedMinor = it.planBaseSavedMinor, status = GoalStatus.valueOf(it.status),
-            pausedSince = it.pausedSince?.let(LocalDate::parse), pausedMonths = it.pausedMonths,
+            pausedSince = it.pausedSince?.let(LocalDate::parse), pausedMonths = it.pausedMonths, icon = it.icon,
         )
     },
     contributions = contributions.map {
@@ -111,5 +124,9 @@ internal fun StateDto.toDomain() = AppState(
             kind = ContributionKind.valueOf(it.kind), note = it.note,
         )
     },
-    settings = Settings(settings.remindersEnabled, settings.reminderHour, Accent.valueOf(settings.accent)),
+    settings = Settings(
+        settings.remindersEnabled, settings.reminderHour, Accent.valueOf(settings.accent),
+        settings.displayName, settings.welcomeSeen,
+    ),
+    challenges = challenges.map { ActiveChallenge(it.challengeId, it.month) },
 )

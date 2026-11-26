@@ -62,7 +62,9 @@ class AhorraRepository(
     /** Sustituye todos los datos por los de un archivo, solo si supera la validación completa. */
     suspend fun importJson(text: String): Boolean = mutex.withLock {
         val candidate = StorageFormat.decode(text) ?: return@withLock false
-        val clean = Ledger.sanitizeImport(candidate, LocalDate.now()) ?: return@withLock false
+        val clean = Ledger.sanitizeImport(candidate, LocalDate.now())
+            ?.let { it.copy(settings = it.settings.copy(welcomeSeen = true)) }
+            ?: return@withLock false
         try {
             withContext(Dispatchers.IO) { store.save(clean) }
         } catch (e: Exception) {

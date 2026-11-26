@@ -4,6 +4,8 @@
     <!-- Único permiso: mostrar los recordatorios (Android 13+). Se pide solo al activarlos.
          La app NO declara INTERNET: no puede enviar datos fuera del dispositivo. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Huella/rostro del sistema para desbloquear la app (opcional). No da acceso a los datos biométricos. -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
     <application
         android:name=".AhorraApp"

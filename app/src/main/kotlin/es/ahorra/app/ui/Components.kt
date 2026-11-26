@@ -1,44 +1,53 @@
 package es.ahorra.app.ui
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import es.ahorra.app.R
-import es.ahorra.core.Goal
-import es.ahorra.core.GoalStatus
-import es.ahorra.core.PlanCalculator
-import java.time.LocalDate
+import es.ahorra.core.GoalIcons
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScreenScaffold(title: String, onBack: (() -> Unit)?, content: @Composable (PaddingValues) -> Unit) {
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = { Text(title) },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
                 navigationIcon = {
                     if (onBack != null) {
-                        TextButton(onClick = onBack) { Text(stringResource(R.string.action_back)) }
+                        TextButton(onClick = onBack) { Text("←  " + stringResource(R.string.action_back)) }
                     }
                 },
             )
@@ -73,63 +82,72 @@ fun MessageDialog(text: String, onDismiss: () -> Unit) {
     )
 }
 
-/** Resumen de un objetivo: ahorrado, progreso animado, próxima aportación y fecha estimada de fin. */
+/** Etiqueta pequeña redondeada, pensada para ir sobre tarjetas con degradado (texto blanco). */
 @Composable
-fun GoalSummary(goal: Goal, saved: Long, today: LocalDate) {
-    val basisPoints = PlanCalculator.progressBasisPoints(saved, goal.targetMinor)
-    val progress by animateFloatAsState(
-        targetValue = basisPoints / 10_000f,
-        animationSpec = tween(durationMillis = 700),
-        label = "progress",
-    )
-    val percentText = stringResource(R.string.home_progress, basisPoints / 100)
-    val next = remember(goal, saved, today) { PlanCalculator.nextPayment(goal, saved, today) }
+fun GlassPill(text: String, modifier: Modifier = Modifier) {
+    Box(
+        modifier
+            .clip(CircleShape)
+            .background(Color.White.copy(alpha = 0.18f))
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+    ) {
+        Text(text, color = Color.White, style = MaterialTheme.typography.labelLarge)
+    }
+}
 
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(goal.name, style = MaterialTheme.typography.titleMedium)
-        Text(money(saved, goal.currencyCode), style = MaterialTheme.typography.headlineMedium)
-        Text(
-            stringResource(R.string.home_of_target, money(goal.targetMinor, goal.currencyCode)),
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        LinearProgressIndicator(
-            progress = { progress },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(10.dp)
-                .semantics { contentDescription = percentText },
-        )
-        Text(percentText, style = MaterialTheme.typography.labelLarge)
-        when (goal.status) {
-            GoalStatus.COMPLETED -> Text(
-                stringResource(R.string.home_status_completed),
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.titleSmall,
-            )
-            GoalStatus.PAUSED -> Text(
-                stringResource(R.string.home_status_paused),
-                style = MaterialTheme.typography.titleSmall,
-            )
-            GoalStatus.ACTIVE -> {
-                if (next != null) {
-                    val amount = money(next.outstandingMinor, goal.currencyCode)
-                    val date = next.installment.dueDate.pretty()
-                    Text(
-                        if (next.overdue) {
-                            stringResource(R.string.home_overdue, amount, date)
-                        } else {
-                            stringResource(R.string.home_next_payment, amount, date)
-                        },
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-                PlanCalculator.estimatedCompletion(goal)?.let { end ->
-                    Text(
-                        stringResource(R.string.home_estimated_end, end.pretty()),
-                        style = MaterialTheme.typography.bodySmall,
-                    )
+/** Círculo con el emoji del objetivo. */
+@Composable
+fun EmojiBadge(emoji: String, size: Int = 48, background: Color = MaterialTheme.colorScheme.primaryContainer) {
+    Box(
+        Modifier
+            .size(size.dp)
+            .clip(CircleShape)
+            .background(background),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(emoji, fontSize = (size * 0.48f).sp)
+    }
+}
+
+/** Selector de icono del objetivo: filas de cinco. */
+@Composable
+fun IconPicker(selected: String, onSelect: (String) -> Unit, modifier: Modifier = Modifier) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        GoalIcons.all.chunked(5).forEach { row ->
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                row.forEach { key ->
+                    val isSelected = key == selected
+                    Box(
+                        Modifier
+                            .size(52.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(
+                                if (isSelected) MaterialTheme.colorScheme.primaryContainer
+                                else MaterialTheme.colorScheme.surfaceContainer,
+                            )
+                            .then(
+                                if (isSelected) {
+                                    Modifier.border(BorderStroke(2.dp, MaterialTheme.colorScheme.primary), RoundedCornerShape(16.dp))
+                                } else {
+                                    Modifier
+                                },
+                            )
+                            .clickable(role = Role.RadioButton) { onSelect(key) }
+                            .semantics { contentDescription = key },
+                        contentAlignment = Alignment.Center,
+                    ) { Text(goalEmoji(key), fontSize = 26.sp) }
                 }
             }
         }
     }
+}
+
+@Composable
+fun SectionTitle(text: String, modifier: Modifier = Modifier) {
+    Text(
+        text,
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = modifier.padding(top = 8.dp),
+    )
 }

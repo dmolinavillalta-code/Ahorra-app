@@ -1,22 +1,31 @@
 package es.ahorra.app.ui
 
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -25,21 +34,31 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.ahorra.app.R
+import es.ahorra.app.ui.theme.LocalBrand
+import es.ahorra.core.Achievement
 import es.ahorra.core.AppState
 import es.ahorra.core.Contribution
 import es.ahorra.core.ContributionKind
+import es.ahorra.core.Gamification
 import es.ahorra.core.Goal
 import es.ahorra.core.GoalStatus
 import es.ahorra.core.Ledger
@@ -47,6 +66,7 @@ import es.ahorra.core.LedgerResult
 import es.ahorra.core.Limits
 import es.ahorra.core.MoneyMath
 import es.ahorra.core.PlanCalculator
+import es.ahorra.core.ProgressSeries
 import es.ahorra.core.Reason
 import java.time.LocalDate
 import java.util.UUID
@@ -61,12 +81,16 @@ fun GoalDetailScreen(data: AppState, vm: AhorraViewModel, goalId: String, onBack
         return
     }
     val today = remember { LocalDate.now() }
+    val haptic = LocalHapticFeedback.current
+    val brand = LocalBrand.current
     val saved = Ledger.savedMinor(data, goal.id)
     val contributions = remember(data, goal.id) {
         data.contributions.filter { it.goalId == goal.id }.sortedByDescending { it.date }
     }
     val schedule = remember(goal) { PlanCalculator.schedule(goal) }
+    val series = remember(data, goal) { ProgressSeries.build(goal, data.contributions, today) }
     val next = PlanCalculator.nextPayment(goal, saved, today)
+    val basisPoints = PlanCalculator.progressBasisPoints(saved, goal.targetMinor)
 
     var showForm by remember { mutableStateOf(false) }
     var pending by remember { mutableStateOf<PendingContribution?>(null) }
@@ -78,94 +102,190 @@ fun GoalDetailScreen(data: AppState, vm: AhorraViewModel, goalId: String, onBack
     var celebrated by rememberSaveable(goal.id) { mutableStateOf(goal.status == GoalStatus.COMPLETED) }
     var showCelebration by remember { mutableStateOf(false) }
     var errorReason by remember { mutableStateOf<Reason?>(null) }
+    var confetti by remember { mutableIntStateOf(0) }
+    var newAchievements by remember { mutableStateOf<List<Achievement>>(emptyList()) }
 
     LaunchedEffect(goal.status) {
         if (goal.status == GoalStatus.COMPLETED && !celebrated) {
             celebrated = true
             showCelebration = true
+            confetti++
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         }
         if (goal.status != GoalStatus.COMPLETED) celebrated = false
     }
 
-    ScreenScaffold(goal.name, onBack) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            item {
-                Card(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        GoalSummary(goal, saved, today)
-                        if (goal.status != GoalStatus.COMPLETED) {
-                            Text(
-                                stringResource(R.string.detail_remaining, money(goal.targetMinor - saved, goal.currencyCode)),
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
+    Box(Modifier.fillMaxSize()) {
+        ScreenScaffold(goal.name, onBack) { padding ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                item {
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(30.dp))
+                            .background(brand.gradient)
+                            .padding(22.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        ProgressRing(fraction = basisPoints / 10_000f, diameter = 190.dp, strokeWidth = 16.dp) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(goalEmoji(goal.icon), fontSize = 40.sp)
+                                Text(
+                                    stringResource(R.string.home_progress, basisPoints / 100),
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.titleMedium,
+                                )
+                            }
+                        }
+                        AnimatedMoney(saved, goal.currencyCode, MaterialTheme.typography.displaySmall, color = Color.White)
+                        Text(
+                            stringResource(R.string.home_of_target, money(goal.targetMinor, goal.currencyCode)),
+                            color = Color.White.copy(alpha = 0.85f),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                        when (goal.status) {
+                            GoalStatus.COMPLETED -> GlassPill("🏆 " + stringResource(R.string.home_status_completed))
+                            GoalStatus.PAUSED -> GlassPill("⏸ " + stringResource(R.string.home_status_paused))
+                            GoalStatus.ACTIVE -> {
+                                GlassPill(stringResource(R.string.detail_remaining, money(goal.targetMinor - saved, goal.currencyCode)))
+                                if (next != null) {
+                                    val amount = money(next.outstandingMinor, goal.currencyCode)
+                                    val date = next.installment.dueDate.pretty()
+                                    Text(
+                                        if (next.overdue) stringResource(R.string.home_overdue, amount, date)
+                                        else stringResource(R.string.home_next_payment, amount, date),
+                                        color = Color.White.copy(alpha = 0.9f),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        textAlign = TextAlign.Center,
+                                    )
+                                }
+                                PlanCalculator.estimatedCompletion(goal)?.let { end ->
+                                    Text(
+                                        stringResource(R.string.home_estimated_end, end.pretty()),
+                                        color = Color.White.copy(alpha = 0.75f),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        textAlign = TextAlign.Center,
+                                    )
+                                }
+                            }
                         }
                     }
                 }
-            }
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (goal.status != GoalStatus.COMPLETED) {
-                        Button(onClick = { showForm = true }, modifier = Modifier.fillMaxWidth()) {
-                            Text(stringResource(R.string.action_add_contribution))
+
+                item {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (goal.status != GoalStatus.COMPLETED) {
+                            Button(
+                                onClick = { showForm = true },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(54.dp),
+                            ) { Text("＋  " + stringResource(R.string.action_add_contribution), style = MaterialTheme.typography.titleMedium) }
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            FilledTonalButton(onClick = { showEdit = true }, modifier = Modifier.weight(1f)) {
+                                Text(stringResource(R.string.action_edit_plan_short))
+                            }
+                            when (goal.status) {
+                                GoalStatus.ACTIVE -> FilledTonalButton(
+                                    onClick = { vm.submit({ Ledger.pauseGoal(it, goal.id, LocalDate.now()) }) },
+                                    modifier = Modifier.weight(1f),
+                                ) { Text(stringResource(R.string.action_pause)) }
+                                GoalStatus.PAUSED -> FilledTonalButton(
+                                    onClick = { vm.submit({ Ledger.resumeGoal(it, goal.id, LocalDate.now()) }) },
+                                    modifier = Modifier.weight(1f),
+                                ) { Text(stringResource(R.string.action_resume)) }
+                                GoalStatus.COMPLETED -> Unit
+                            }
                         }
                     }
-                    OutlinedButton(onClick = { showEdit = true }, modifier = Modifier.fillMaxWidth()) {
-                        Text(stringResource(R.string.action_edit_plan))
+                }
+
+                if (series.actual.size >= 2) {
+                    item {
+                        Card(
+                            Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(26.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest),
+                        ) {
+                            Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                Text(stringResource(R.string.chart_title), style = MaterialTheme.typography.titleMedium)
+                                EvolutionChart(
+                                    series = series,
+                                    targetMinor = goal.targetMinor,
+                                    description = stringResource(R.string.chart_description, money(saved, goal.currencyCode), money(goal.targetMinor, goal.currencyCode)),
+                                    lineColor = MaterialTheme.colorScheme.primary,
+                                    planColor = MaterialTheme.colorScheme.outline,
+                                    gridColor = MaterialTheme.colorScheme.outlineVariant,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(150.dp),
+                                )
+                                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                    Text("━ " + stringResource(R.string.chart_actual), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium)
+                                    Text("┅ " + stringResource(R.string.chart_plan), color = MaterialTheme.colorScheme.outline, style = MaterialTheme.typography.labelMedium)
+                                }
+                            }
+                        }
                     }
-                    when (goal.status) {
-                        GoalStatus.ACTIVE -> OutlinedButton(
-                            onClick = { vm.submit({ Ledger.pauseGoal(it, goal.id, LocalDate.now()) }) },
-                            modifier = Modifier.fillMaxWidth(),
-                        ) { Text(stringResource(R.string.action_pause)) }
-                        GoalStatus.PAUSED -> OutlinedButton(
-                            onClick = { vm.submit({ Ledger.resumeGoal(it, goal.id, LocalDate.now()) }) },
-                            modifier = Modifier.fillMaxWidth(),
-                        ) { Text(stringResource(R.string.action_resume)) }
-                        GoalStatus.COMPLETED -> Unit
+                }
+
+                if (schedule.isNotEmpty()) {
+                    item { SectionTitle(stringResource(R.string.detail_schedule_title)) }
+                    items(schedule, key = { "i${it.index}" }) { installment ->
+                        val paid = PlanCalculator.isPaid(installment, goal, saved)
+                        val line = stringResource(
+                            R.string.detail_installment,
+                            installment.dueDate.pretty(),
+                            money(installment.amountMinor, goal.currencyCode),
+                        )
+                        Text(
+                            if (paid) "✅ $line · " + stringResource(R.string.detail_paid) else "⚪ $line",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
                     }
+                }
+
+                item { SectionTitle(stringResource(R.string.detail_history_title)) }
+                if (contributions.isEmpty()) {
+                    item {
+                        Text(
+                            stringResource(R.string.detail_history_empty),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                items(contributions, key = { it.id }) { c ->
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            val extra = if (c.kind == ContributionKind.EXTRA) " · ⚡ " + stringResource(R.string.contribution_kind_extra) else ""
+                            Text(money(c.amountMinor, goal.currencyCode) + extra, style = MaterialTheme.typography.bodyLarge)
+                            Text(
+                                c.date.pretty() + if (c.note.isNotBlank()) " · ${c.note}" else "",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        TextButton(onClick = { contributionToDelete = c }) { Text(stringResource(R.string.action_delete)) }
+                    }
+                }
+
+                item {
                     TextButton(onClick = { showDeleteGoal = true }, modifier = Modifier.fillMaxWidth()) {
                         Text(stringResource(R.string.action_delete_goal), color = MaterialTheme.colorScheme.error)
                     }
                 }
             }
-
-            if (schedule.isNotEmpty()) {
-                item { Text(stringResource(R.string.detail_schedule_title), style = MaterialTheme.typography.titleMedium) }
-                items(schedule, key = { "i${it.index}" }) { installment ->
-                    val paid = PlanCalculator.isPaid(installment, goal, saved)
-                    val line = stringResource(
-                        R.string.detail_installment,
-                        installment.dueDate.pretty(),
-                        money(installment.amountMinor, goal.currencyCode),
-                    )
-                    Text(if (paid) "✓ $line · " + stringResource(R.string.detail_paid) else line)
-                }
-            }
-
-            item { Text(stringResource(R.string.detail_history_title), style = MaterialTheme.typography.titleMedium) }
-            if (contributions.isEmpty()) {
-                item { Text(stringResource(R.string.detail_history_empty), style = MaterialTheme.typography.bodyMedium) }
-            }
-            items(contributions, key = { it.id }) { c ->
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Column(Modifier.weight(1f)) {
-                        val extra = if (c.kind == ContributionKind.EXTRA) " · " + stringResource(R.string.contribution_kind_extra) else ""
-                        Text(money(c.amountMinor, goal.currencyCode) + extra, style = MaterialTheme.typography.bodyLarge)
-                        Text(
-                            c.date.pretty() + if (c.note.isNotBlank()) " · ${c.note}" else "",
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                    TextButton(onClick = { contributionToDelete = c }) { Text(stringResource(R.string.action_delete)) }
-                }
-            }
         }
+        ConfettiBurst(trigger = confetti, modifier = Modifier.fillMaxSize())
     }
 
     if (showForm) {
@@ -186,6 +306,7 @@ fun GoalDetailScreen(data: AppState, vm: AhorraViewModel, goalId: String, onBack
                 pending = null
                 showForm = false
                 val now = LocalDate.now()
+                val before = Gamification.achievements(data, now)
                 val contribution = Contribution(
                     id = contributionId,
                     goalId = goal.id,
@@ -196,7 +317,15 @@ fun GoalDetailScreen(data: AppState, vm: AhorraViewModel, goalId: String, onBack
                 )
                 vm.submit({ Ledger.addContribution(it, contribution, now) }) { result ->
                     when (result) {
-                        is LedgerResult.Ok -> contributionId = UUID.randomUUID().toString()
+                        is LedgerResult.Ok -> {
+                            contributionId = UUID.randomUUID().toString()
+                            if (result.changed) {
+                                val after = Gamification.achievements(result.state, now)
+                                newAchievements = (after - before).toList().sorted()
+                                confetti++
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            }
+                        }
                         is LedgerResult.Rejected -> errorReason = result.reason
                     }
                 }
@@ -207,9 +336,9 @@ fun GoalDetailScreen(data: AppState, vm: AhorraViewModel, goalId: String, onBack
         EditPlanDialog(
             goal = goal,
             onDismiss = { showEdit = false },
-            onSave = { name, target, months, day ->
+            onSave = { name, target, months, day, icon ->
                 showEdit = false
-                vm.submit({ Ledger.updatePlan(it, goal.id, name, target, months, day, LocalDate.now()) }) { result ->
+                vm.submit({ Ledger.updatePlan(it, goal.id, name, target, months, day, LocalDate.now(), icon) }) { result ->
                     if (result is LedgerResult.Rejected) errorReason = result.reason
                 }
             },
@@ -241,6 +370,8 @@ fun GoalDetailScreen(data: AppState, vm: AhorraViewModel, goalId: String, onBack
     }
     if (showCelebration) {
         CelebrationDialog(goal.name) { showCelebration = false }
+    } else if (newAchievements.isNotEmpty()) {
+        AchievementDialog(newAchievements) { newAchievements = emptyList() }
     }
     errorReason?.let { reason ->
         MessageDialog(stringResource(reason.messageRes())) { errorReason = null }
@@ -299,9 +430,10 @@ private fun ContributionFormDialog(
 private fun EditPlanDialog(
     goal: Goal,
     onDismiss: () -> Unit,
-    onSave: (name: String, targetMinor: Long, months: Int, day: Int) -> Unit,
+    onSave: (name: String, targetMinor: Long, months: Int, day: Int, icon: String) -> Unit,
 ) {
     var name by rememberSaveable { mutableStateOf(goal.name) }
+    var icon by rememberSaveable { mutableStateOf(goal.icon) }
     var targetText by rememberSaveable { mutableStateOf(MoneyMath.toPlain(goal.targetMinor, goal.currencyCode)) }
     var monthsText by rememberSaveable { mutableStateOf(goal.months.toString()) }
     var dayText by rememberSaveable { mutableStateOf(goal.paymentDay.toString()) }
@@ -315,39 +447,45 @@ private fun EditPlanDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.action_edit_plan)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it.take(Limits.MAX_NAME) },
-                    label = { Text(stringResource(R.string.field_purpose)) },
-                    singleLine = true,
-                )
-                OutlinedTextField(
-                    value = targetText,
-                    onValueChange = { text -> targetText = text.filter { it.isDigit() || it == ',' || it == '.' }.take(16) },
-                    label = { Text(stringResource(R.string.field_target, goal.currencyCode)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                )
-                OutlinedTextField(
-                    value = monthsText,
-                    onValueChange = { monthsText = it.filter(Char::isDigit).take(3) },
-                    label = { Text(stringResource(R.string.field_months)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                )
-                OutlinedTextField(
-                    value = dayText,
-                    onValueChange = { dayText = it.filter(Char::isDigit).take(2) },
-                    label = { Text(stringResource(R.string.field_day)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                )
-                Text(stringResource(R.string.edit_plan_hint), style = MaterialTheme.typography.bodySmall)
+            run {
+                Column(
+                    Modifier.verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it.take(Limits.MAX_NAME) },
+                        label = { Text(stringResource(R.string.field_purpose)) },
+                        singleLine = true,
+                    )
+                    IconPicker(selected = icon, onSelect = { icon = it })
+                    OutlinedTextField(
+                        value = targetText,
+                        onValueChange = { text -> targetText = text.filter { it.isDigit() || it == ',' || it == '.' }.take(16) },
+                        label = { Text(stringResource(R.string.field_target, goal.currencyCode)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    )
+                    OutlinedTextField(
+                        value = monthsText,
+                        onValueChange = { monthsText = it.filter(Char::isDigit).take(3) },
+                        label = { Text(stringResource(R.string.field_months)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    )
+                    OutlinedTextField(
+                        value = dayText,
+                        onValueChange = { dayText = it.filter(Char::isDigit).take(2) },
+                        label = { Text(stringResource(R.string.field_day)) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    )
+                    Text(stringResource(R.string.edit_plan_hint), style = MaterialTheme.typography.bodySmall)
+                }
             }
         },
         confirmButton = {
-            TextButton(enabled = valid, onClick = { onSave(name, target!!, months!!, day!!) }) {
+            TextButton(enabled = valid, onClick = { onSave(name, target!!, months!!, day!!, icon) }) {
                 Text(stringResource(R.string.action_save))
             }
         },
@@ -371,7 +509,32 @@ private fun CelebrationDialog(goalName: String, onDismiss: () -> Unit) {
         text = {
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("🎉", fontSize = 56.sp, modifier = Modifier.scale(scale))
-                Text(stringResource(R.string.celebration_body, goalName))
+                Text(stringResource(R.string.celebration_body, goalName), textAlign = TextAlign.Center)
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_ok)) } },
+    )
+}
+
+/** Logros recién conseguidos con esta aportación. */
+@Composable
+private fun AchievementDialog(achievements: List<Achievement>, onDismiss: () -> Unit) {
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { visible = true }
+    val scale by animateFloatAsState(
+        targetValue = if (visible) 1f else 0.3f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+        label = "achievement",
+    )
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.achievement_new_title)) },
+        text = {
+            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                achievements.forEach { a ->
+                    Text(a.emoji(), fontSize = 48.sp, modifier = Modifier.scale(scale))
+                    Text(stringResource(a.labelRes()), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+                }
             }
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_ok)) } },

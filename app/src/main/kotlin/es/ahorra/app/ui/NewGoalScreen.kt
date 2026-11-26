@@ -27,6 +27,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import es.ahorra.app.R
 import es.ahorra.core.Goal
+import es.ahorra.core.GoalIcons
 import es.ahorra.core.Ledger
 import es.ahorra.core.LedgerResult
 import es.ahorra.core.Limits
@@ -42,6 +43,7 @@ fun NewGoalScreen(vm: AhorraViewModel, onBack: () -> Unit) {
     // El identificador se fija al abrir la pantalla: si se pulsa "Crear" dos veces, solo se crea un objetivo.
     val goalId = rememberSaveable { UUID.randomUUID().toString() }
     var purpose by rememberSaveable { mutableStateOf("") }
+    var icon by rememberSaveable { mutableStateOf(GoalIcons.DEFAULT) }
     var currency by rememberSaveable { mutableStateOf(defaultCurrency()) }
     var targetText by rememberSaveable { mutableStateOf("") }
     var monthsText by rememberSaveable { mutableStateOf("12") }
@@ -75,6 +77,9 @@ fun NewGoalScreen(vm: AhorraViewModel, onBack: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
             )
 
+            Text(stringResource(R.string.field_icon), style = MaterialTheme.typography.labelLarge)
+            IconPicker(selected = icon, onSelect = { icon = it })
+
             Text(stringResource(R.string.field_currency), style = MaterialTheme.typography.labelLarge)
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
@@ -100,6 +105,18 @@ fun NewGoalScreen(vm: AhorraViewModel, onBack: () -> Unit) {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier.fillMaxWidth(),
             )
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                listOf(6, 12, 18, 24, 36).forEach { m ->
+                    FilterChip(
+                        selected = monthsText == m.toString(),
+                        onClick = { monthsText = m.toString(); error = null },
+                        label = { Text(stringResource(R.string.months_chip, m)) },
+                    )
+                }
+            }
             OutlinedTextField(
                 value = monthsText,
                 onValueChange = { monthsText = it.filter(Char::isDigit).take(3); error = null },
@@ -143,6 +160,7 @@ fun NewGoalScreen(vm: AhorraViewModel, onBack: () -> Unit) {
                         startDate = today,
                         months = months!!,
                         paymentDay = day!!,
+                        icon = icon,
                     )
                     vm.submit({ Ledger.createGoal(it, goal) }) { result ->
                         submitting = false

@@ -6,12 +6,14 @@ import androidx.annotation.StringRes
 import es.ahorra.app.R
 import es.ahorra.core.Accent
 import es.ahorra.core.Achievement
+import es.ahorra.core.ChallengeType
 import es.ahorra.core.MoneyMath
 import es.ahorra.core.Reason
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Currency
@@ -26,6 +28,84 @@ fun LocalDate.pretty(): String =
 fun defaultCurrency(): String {
     val code = runCatching { Currency.getInstance(Locale.getDefault()).currencyCode }.getOrNull()
     return if (code != null && MoneyMath.isValidCurrency(code)) code else "EUR"
+}
+
+/** Saludo según la hora del día. */
+@StringRes
+fun greetingRes(time: LocalTime = LocalTime.now()): Int = when (time.hour) {
+    in 6..11 -> R.string.greeting_morning
+    in 12..19 -> R.string.greeting_afternoon
+    in 20..23 -> R.string.greeting_evening
+    else -> R.string.greeting_night
+}
+
+fun goalEmoji(key: String): String = when (key) {
+    "phone" -> "📱"
+    "plane" -> "✈️"
+    "car" -> "🚗"
+    "home" -> "🏠"
+    "laptop" -> "💻"
+    "gift" -> "🎁"
+    "heart" -> "❤️"
+    "school" -> "🎓"
+    "ring" -> "💍"
+    "bike" -> "🚲"
+    "shield" -> "🛡️"
+    "music" -> "🎵"
+    "game" -> "🎮"
+    "sun" -> "☀️"
+    else -> "🎯"
+}
+
+fun Achievement.emoji(): String = when (this) {
+    Achievement.FIRST_GOAL -> "🌱"
+    Achievement.FIRST_CONTRIBUTION -> "🪙"
+    Achievement.EXTRA_CONTRIBUTION -> "⚡"
+    Achievement.STREAK_3 -> "🔥"
+    Achievement.STREAK_6 -> "🚀"
+    Achievement.STREAK_12 -> "👑"
+    Achievement.PERCENT_25 -> "🌤️"
+    Achievement.HALFWAY -> "⛰️"
+    Achievement.PERCENT_75 -> "🏔️"
+    Achievement.GOAL_COMPLETED -> "🏆"
+    Achievement.TEN_CONTRIBUTIONS -> "🔟"
+    Achievement.TWO_GOALS -> "🎯"
+    Achievement.CHALLENGE_DONE -> "🎖️"
+}
+
+@StringRes
+fun ChallengeType.titleRes(): Int = when (this) {
+    ChallengeType.EXTRA -> R.string.challenge_extra_title
+    ChallengeType.THREE -> R.string.challenge_three_title
+    ChallengeType.EARLY -> R.string.challenge_early_title
+    ChallengeType.WEEKS -> R.string.challenge_weeks_title
+}
+
+@StringRes
+fun ChallengeType.descRes(): Int = when (this) {
+    ChallengeType.EXTRA -> R.string.challenge_extra_desc
+    ChallengeType.THREE -> R.string.challenge_three_desc
+    ChallengeType.EARLY -> R.string.challenge_early_desc
+    ChallengeType.WEEKS -> R.string.challenge_weeks_desc
+}
+
+fun ChallengeType.emoji(): String = when (this) {
+    ChallengeType.EXTRA -> "⚡"
+    ChallengeType.THREE -> "🎯"
+    ChallengeType.EARLY -> "🌅"
+    ChallengeType.WEEKS -> "📆"
+}
+
+@StringRes
+fun levelNameRes(level: Int): Int = when (level) {
+    1 -> R.string.level_name_1
+    2 -> R.string.level_name_2
+    3 -> R.string.level_name_3
+    4 -> R.string.level_name_4
+    5 -> R.string.level_name_5
+    6 -> R.string.level_name_6
+    7 -> R.string.level_name_7
+    else -> R.string.level_name_8
 }
 
 @StringRes
@@ -49,8 +129,13 @@ fun Achievement.labelRes(): Int = when (this) {
     Achievement.STREAK_3 -> R.string.ach_streak_3
     Achievement.STREAK_6 -> R.string.ach_streak_6
     Achievement.STREAK_12 -> R.string.ach_streak_12
+    Achievement.PERCENT_25 -> R.string.ach_percent_25
     Achievement.HALFWAY -> R.string.ach_halfway
+    Achievement.PERCENT_75 -> R.string.ach_percent_75
     Achievement.GOAL_COMPLETED -> R.string.ach_completed
+    Achievement.TEN_CONTRIBUTIONS -> R.string.ach_ten
+    Achievement.TWO_GOALS -> R.string.ach_two_goals
+    Achievement.CHALLENGE_DONE -> R.string.ach_challenge
 }
 
 @StringRes
@@ -59,12 +144,14 @@ fun Accent.labelRes(): Int = when (this) {
     Accent.INDIGO -> R.string.accent_indigo
     Accent.AMBER -> R.string.accent_amber
     Accent.ROSE -> R.string.accent_rose
+    Accent.EMERALD -> R.string.accent_emerald
+    Accent.VIOLET -> R.string.accent_violet
 }
 
 private const val MAX_IMPORT_BYTES = 10 * 1024 * 1024
 
 /** Lee un archivo elegido por la persona (selector del sistema, sin permisos). null si falla o es demasiado grande. */
-suspend fun readTextLimited(context: Context, uri: Uri): String? = withContext(Dispatchers.IO) {
+suspend fun readBytesLimited(context: Context, uri: Uri): ByteArray? = withContext(Dispatchers.IO) {
     runCatching {
         context.contentResolver.openInputStream(uri)?.use { input ->
             val out = ByteArrayOutputStream()
@@ -77,15 +164,15 @@ suspend fun readTextLimited(context: Context, uri: Uri): String? = withContext(D
                 if (total > MAX_IMPORT_BYTES) return@runCatching null
                 out.write(buffer, 0, read)
             }
-            out.toString(Charsets.UTF_8.name())
+            out.toByteArray()
         }
     }.getOrNull()
 }
 
-suspend fun writeText(context: Context, uri: Uri, text: String): Boolean = withContext(Dispatchers.IO) {
+suspend fun writeBytes(context: Context, uri: Uri, bytes: ByteArray): Boolean = withContext(Dispatchers.IO) {
     runCatching {
         val stream = context.contentResolver.openOutputStream(uri) ?: return@runCatching false
-        stream.use { it.write(text.toByteArray(Charsets.UTF_8)) }
+        stream.use { it.write(bytes) }
         true
     }.getOrDefault(false)
 }

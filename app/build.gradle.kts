@@ -25,6 +25,14 @@ android {
     }
 
     signingConfigs {
+        // Clave de depuración ESTABLE para uso personal: permite actualizar la app encima de la anterior.
+        // No es secreta ni sirve para Google Play (la subida usa la clave de CI de abajo).
+        create("personal") {
+            storeFile = file("ahorra-debug.keystore")
+            storePassword = "ahorradebug"
+            keyAlias = "ahorra"
+            keyPassword = "ahorradebug"
+        }
         // La firma real se inyecta por variables de entorno (CI). Nunca hay secretos en el repositorio.
         val keystorePath = System.getenv("AHORRA_KEYSTORE_FILE")
         if (keystorePath != null) {
@@ -38,6 +46,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("personal")
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
@@ -82,6 +93,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.biometric)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.android)
 
