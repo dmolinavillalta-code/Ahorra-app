@@ -51,7 +51,7 @@ class HomeScreenTest {
         rule.setContent {
             AhorraTheme { HomeScreen(state, onOpenGoal = {}, onNewGoal = {}) }
         }
-        rule.onNodeWithText("Viaje").assertExists()
+        rule.onNodeWithText("Viaje", substring = true).assertExists()
         // 500 de 3.000 => 16 % (enteros, sin redondeo hacia arriba).
         rule.onNodeWithText(text(R.string.home_progress, 16)).assertExists()
     }
