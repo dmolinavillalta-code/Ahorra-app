@@ -72,6 +72,8 @@ fun FriendsScreen(data: AppState, vm: AhorraViewModel) {
     var toRemove by remember { mutableStateOf<FriendCard?>(null) }
     val settings = data.settings
     val canShare = settings.displayName.isNotBlank()
+    val shareIntro = stringResource(R.string.friends_share_text, settings.displayName)
+    val shareTitle = stringResource(R.string.friends_share)
 
     // Identificador aleatorio local: permite que un amigo actualice tu tarjeta sin duplicarla. No es una cuenta.
     LaunchedEffect(settings.profileId) {
@@ -103,13 +105,13 @@ fun FriendsScreen(data: AppState, vm: AhorraViewModel) {
                         enabled = canShare && settings.profileId.isNotBlank(),
                         onClick = {
                             val card = Friends.myCard(data, today)
-                            val text = context.getString(R.string.friends_share_text, card.name) + "\n\n" + FriendCodec.encode(card)
+                            val text = shareIntro + "\n\n" + FriendCodec.encode(card)
                             vm.skipNextAutoLock()
                             val send = Intent(Intent.ACTION_SEND).apply {
                                 type = "text/plain"
                                 putExtra(Intent.EXTRA_TEXT, text)
                             }
-                            context.startActivity(Intent.createChooser(send, context.getString(R.string.friends_share)))
+                            context.startActivity(Intent.createChooser(send, shareTitle))
                         },
                         colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = OnBrand, contentColor = brand.gradientStart),
                     ) { Text(stringResource(R.string.friends_share)) }
