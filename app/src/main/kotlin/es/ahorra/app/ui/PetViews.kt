@@ -118,7 +118,7 @@ fun RarityChip(rarity: Rarity, modifier: Modifier = Modifier) {
     Box(
         modifier
             .clip(CircleShape)
-            .background(rarity.color().copy(alpha = 0.55f))
+            .background(rarity.color().copy(alpha = 0.55f)),
         contentAlignment = Alignment.Center,
     ) {
         Text(
