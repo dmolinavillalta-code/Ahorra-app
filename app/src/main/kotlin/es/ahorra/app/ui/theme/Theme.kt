@@ -14,91 +14,73 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import es.ahorra.core.Accent
 
-/** Degradado de marca para tarjetas destacadas y pantallas de bienvenida (texto blanco encima). */
+/** Texto y trazos sobre las superficies con degradado de marca (marrón oscuro: contraste alto sobre el pastel). */
+val OnBrand = Color(0xFF3A1C0C)
+
+/** Degradado de marca para tarjetas destacadas y pantallas de bienvenida. [accentText] sirve para texto de énfasis sobre el fondo normal. */
 @Immutable
-class AhorraBrand(val gradientStart: Color, val gradientEnd: Color) {
+class AhorraBrand(val gradientStart: Color, val gradientEnd: Color, val accentText: Color) {
     val gradient: Brush get() = Brush.linearGradient(listOf(gradientStart, gradientEnd))
 }
 
-val LocalBrand = staticCompositionLocalOf { AhorraBrand(Color(0xFF0A5C56), Color(0xFF0E7F73)) }
+val LocalBrand = staticCompositionLocalOf { AhorraBrand(Color(0xFFFFD3B0), Color(0xFFF7A56F), Color(0xFFA24A12)) }
 
-private class AccentPalette(
-    val lightPrimary: Color,
-    val darkPrimary: Color,
-    val gradientStart: Color,
-    val gradientEnd: Color,
+/** Una sola identidad de color en toda la app: naranja pastel. */
+private val PastelStart = Color(0xFFFFD6B8)
+private val PastelEnd = Color(0xFFF6A36B)
+private val Primary = Color(0xFFEE8F4B)
+private val PrimaryDark = Color(0xFFF7B488)
+
+private fun lightScheme(): ColorScheme = lightColorScheme(
+    primary = Primary,
+    onPrimary = OnBrand,
+    primaryContainer = Color(0xFFFFE4D1),
+    onPrimaryContainer = Color(0xFF3A1C0C),
+    secondary = Primary,
+    secondaryContainer = Color(0xFFFFE4D1),
+    onSecondaryContainer = Color(0xFF3A1C0C),
+    background = Color(0xFFFFF8F2),
+    onBackground = Color(0xFF2B1A10),
+    surface = Color(0xFFFFF8F2),
+    onSurface = Color(0xFF2B1A10),
+    surfaceVariant = Color(0xFFF6E7DA),
+    onSurfaceVariant = Color(0xFF6B5444),
+    outline = Color(0xFFB59A88),
+    outlineVariant = Color(0xFFEBD9CA),
+    surfaceContainerLowest = Color.White,
+    surfaceContainerLow = Color(0xFFFFF1E6),
+    surfaceContainer = Color(0xFFFCEADD),
+    surfaceContainerHigh = Color(0xFFF8E2D2),
+    surfaceContainerHighest = Color(0xFFF3DACA),
 )
 
-private fun Accent.palette(): AccentPalette = when (this) {
-    Accent.TEAL -> AccentPalette(Color(0xFF0F766E), Color(0xFF5EEAD4), Color(0xFF0A5C56), Color(0xFF0E7F73))
-    Accent.INDIGO -> AccentPalette(Color(0xFF4F46E5), Color(0xFFA5B4FC), Color(0xFF3730A3), Color(0xFF5249D9))
-    Accent.AMBER -> AccentPalette(Color(0xFFB45309), Color(0xFFFBBF24), Color(0xFF8A3B0C), Color(0xFFB45309))
-    Accent.ROSE -> AccentPalette(Color(0xFFBE123C), Color(0xFFFDA4AF), Color(0xFF9F1239), Color(0xFFD61F52))
-    Accent.EMERALD -> AccentPalette(Color(0xFF047857), Color(0xFF6EE7B7), Color(0xFF065F46), Color(0xFF047857))
-    Accent.VIOLET -> AccentPalette(Color(0xFF7C3AED), Color(0xFFC4B5FD), Color(0xFF5B21B6), Color(0xFF7C3AED))
-}
-
-/** Color con el que se muestra cada acento en el selector de Ajustes. */
-fun Accent.swatch(): Color = palette().gradientEnd
-
-private fun lightScheme(primary: Color): ColorScheme {
-    val container = lerp(Color.White, primary, 0.14f)
-    return lightColorScheme(
-        primary = primary,
-        onPrimary = Color.White,
-        primaryContainer = container,
-        onPrimaryContainer = Color(0xFF111827),
-        secondary = primary,
-        secondaryContainer = container,
-        onSecondaryContainer = Color(0xFF111827),
-        background = Color(0xFFF6F7F4),
-        onBackground = Color(0xFF111827),
-        surface = Color(0xFFF6F7F4),
-        onSurface = Color(0xFF111827),
-        surfaceVariant = Color(0xFFE9ECE7),
-        onSurfaceVariant = Color(0xFF4B5563),
-        outline = Color(0xFF9CA3AF),
-        outlineVariant = Color(0xFFE2E5DF),
-        surfaceContainerLowest = Color.White,
-        surfaceContainerLow = Color(0xFFF1F3EE),
-        surfaceContainer = Color(0xFFECEEE8),
-        surfaceContainerHigh = Color(0xFFE7EAE3),
-        surfaceContainerHighest = Color(0xFFE2E5DE),
-    )
-}
-
-private fun darkScheme(primary: Color): ColorScheme {
-    val container = lerp(Color(0xFF111414), primary, 0.22f)
-    return darkColorScheme(
-        primary = primary,
-        onPrimary = Color(0xFF06201D),
-        primaryContainer = container,
-        onPrimaryContainer = Color(0xFFF3F4F6),
-        secondary = primary,
-        secondaryContainer = container,
-        onSecondaryContainer = Color(0xFFF3F4F6),
-        background = Color(0xFF0C0F0F),
-        onBackground = Color(0xFFF3F4F6),
-        surface = Color(0xFF0C0F0F),
-        onSurface = Color(0xFFF3F4F6),
-        surfaceVariant = Color(0xFF232928),
-        onSurfaceVariant = Color(0xFFB7BEBC),
-        outline = Color(0xFF6B7573),
-        outlineVariant = Color(0xFF2A3130),
-        surfaceContainerLowest = Color(0xFF151919),
-        surfaceContainerLow = Color(0xFF181D1C),
-        surfaceContainer = Color(0xFF1D2322),
-        surfaceContainerHigh = Color(0xFF232928),
-        surfaceContainerHighest = Color(0xFF2A3130),
-    )
-}
+private fun darkScheme(): ColorScheme = darkColorScheme(
+    primary = PrimaryDark,
+    onPrimary = OnBrand,
+    primaryContainer = Color(0xFF5A3419),
+    onPrimaryContainer = Color(0xFFFFE9DA),
+    secondary = PrimaryDark,
+    secondaryContainer = Color(0xFF5A3419),
+    onSecondaryContainer = Color(0xFFFFE9DA),
+    background = Color(0xFF1B1310),
+    onBackground = Color(0xFFF7EBE2),
+    surface = Color(0xFF1B1310),
+    onSurface = Color(0xFFF7EBE2),
+    surfaceVariant = Color(0xFF3A2D26),
+    onSurfaceVariant = Color(0xFFD0BBAD),
+    outline = Color(0xFF8E7867),
+    outlineVariant = Color(0xFF45352B),
+    surfaceContainerLowest = Color(0xFF241A15),
+    surfaceContainerLow = Color(0xFF2A1F19),
+    surfaceContainer = Color(0xFF30241D),
+    surfaceContainerHigh = Color(0xFF392B23),
+    surfaceContainerHighest = Color(0xFF43332A),
+)
 
 private val AhorraTypography: Typography = Typography().let { base ->
     base.copy(
@@ -121,18 +103,16 @@ private val AhorraShapes = Shapes(
     extraLarge = RoundedCornerShape(32.dp),
 )
 
-/** Tema claro/oscuro del sistema; el acento es un cosmético que se desbloquea con la constancia. */
+/** Tema claro/oscuro del sistema con un único color de marca (naranja pastel). */
 @Composable
 fun AhorraTheme(
-    accent: Accent = Accent.TEAL,
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit,
 ) {
-    val palette = accent.palette()
-    val brand = AhorraBrand(palette.gradientStart, palette.gradientEnd)
+    val brand = AhorraBrand(PastelStart, PastelEnd, if (darkTheme) Color(0xFFFFC9A0) else Color(0xFFA24A12))
     CompositionLocalProvider(LocalBrand provides brand) {
         MaterialTheme(
-            colorScheme = if (darkTheme) darkScheme(palette.darkPrimary) else lightScheme(palette.lightPrimary),
+            colorScheme = if (darkTheme) darkScheme() else lightScheme(),
             typography = AhorraTypography,
             shapes = AhorraShapes,
             content = content,

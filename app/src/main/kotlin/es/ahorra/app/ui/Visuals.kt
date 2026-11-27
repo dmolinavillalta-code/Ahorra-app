@@ -52,6 +52,7 @@ import es.ahorra.core.GoalSeries
 import java.time.LocalDate
 import kotlin.math.sin
 import kotlin.random.Random
+import es.ahorra.app.ui.theme.OnBrand
 
 /** Anillo de progreso con degradado que se dibuja con una animación suave. */
 @Composable
@@ -60,9 +61,9 @@ fun ProgressRing(
     modifier: Modifier = Modifier,
     diameter: Dp = 160.dp,
     strokeWidth: Dp = 14.dp,
-    trackColor: Color = Color.White.copy(alpha = 0.22f),
-    startColor: Color = Color.White.copy(alpha = 0.75f),
-    endColor: Color = Color.White,
+    trackColor: Color = OnBrand.copy(alpha = 0.22f),
+    startColor: Color = OnBrand.copy(alpha = 0.75f),
+    endColor: Color = OnBrand,
     durationMillis: Int = 1100,
     content: @Composable BoxScope.() -> Unit = {},
 ) {
@@ -183,13 +184,13 @@ fun BrandMark(
         heights.forEachIndexed { i, hFraction ->
             val h = w * hFraction * grow.value
             drawRoundRect(
-                color = Color.White,
+                color = OnBrand,
                 topLeft = Offset(left + i * (bar + gap), baseY - h),
                 size = Size(bar, h.coerceAtLeast(0.1f)),
                 cornerRadius = CornerRadius(bar / 2f),
             )
         }
-        drawCircle(Color.White.copy(alpha = 0.9f * grow.value), radius = w * 0.035f, center = Offset(w * 0.74f, w * 0.26f))
+        drawCircle(OnBrand.copy(alpha = 0.9f * grow.value), radius = w * 0.035f, center = Offset(w * 0.74f, w * 0.26f))
     }
 }
 

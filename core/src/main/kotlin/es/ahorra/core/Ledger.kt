@@ -6,7 +6,7 @@ import java.time.YearMonth
 enum class Reason {
     INVALID_NAME, INVALID_TARGET, INVALID_MONTHS, INVALID_DAY, INVALID_CURRENCY,
     INVALID_AMOUNT, INVALID_DATE, INVALID_SETTINGS, UNKNOWN_GOAL, GOAL_COMPLETED,
-    LIMIT_REACHED, NOT_READY, STORAGE_ERROR, INVALID_ICON, INVALID_CHALLENGE,
+    LIMIT_REACHED, NOT_READY, STORAGE_ERROR, INVALID_ICON, INVALID_CHALLENGE, INVALID_PET_NAME, INVALID_FRIEND,
 }
 
 sealed interface LedgerResult {
@@ -30,14 +30,16 @@ object Ledger {
         validateGoalFields(goal.name, goal.targetMinor, goal.currencyCode, goal.months, goal.paymentDay)
             ?.let { return LedgerResult.Rejected(it) }
         if (!GoalIcons.isValid(goal.icon)) return LedgerResult.Rejected(Reason.INVALID_ICON)
+        if (!validPetName(goal.petName)) return LedgerResult.Rejected(Reason.INVALID_PET_NAME)
         val clean = goal.copy(
             name = goal.name.trim(),
+            petName = goal.petName.trim(),
             planBaseSavedMinor = 0,
             status = GoalStatus.ACTIVE,
             pausedSince = null,
             pausedMonths = emptyList(),
         )
-        return LedgerResult.Ok(state.copy(goals = state.goals + clean))
+        return LedgerResult.Ok(Pets.discover(state.copy(goals = state.goals + clean)))
     }
 
     fun addContribution(state: AppState, contribution: Contribution, today: LocalDate): LedgerResult {
@@ -54,7 +56,7 @@ object Ledger {
         }
         if (state.contributions.size >= Limits.MAX_CONTRIBUTIONS) return LedgerResult.Rejected(Reason.LIMIT_REACHED)
         val stored = contribution.copy(note = contribution.note.trim().take(Limits.MAX_NOTE))
-        return LedgerResult.Ok(refreshStatus(state.copy(contributions = state.contributions + stored), goal.id))
+        return LedgerResult.Ok(Pets.discover(refreshStatus(state.copy(contributions = state.contributions + stored), goal.id)))
     }
 
     fun removeContribution(state: AppState, contributionId: String): LedgerResult {
@@ -139,13 +141,39 @@ object Ledger {
         )
     }
 
+    fun renamePet(state: AppState, goalId: String, petName: String): LedgerResult {
+        val goal = state.goals.firstOrNull { it.id == goalId } ?: return LedgerResult.Rejected(Reason.UNKNOWN_GOAL)
+        if (!validPetName(petName)) return LedgerResult.Rejected(Reason.INVALID_PET_NAME)
+        if (goal.petName == petName.trim()) return LedgerResult.Ok(state, changed = false)
+        return LedgerResult.Ok(replaceGoal(state, goal.copy(petName = petName.trim())))
+    }
+
+    /** Guarda (o actualiza) la tarjeta de un amigo. La misma persona (mismo profileId) nunca se duplica. */
+    fun addFriend(state: AppState, card: FriendCard, today: LocalDate): LedgerResult {
+        val clean = Friends.sanitize(card, today) ?: return LedgerResult.Rejected(Reason.INVALID_FRIEND)
+        if (clean.profileId == state.settings.profileId) return LedgerResult.Rejected(Reason.INVALID_FRIEND)
+        val others = state.friends.filterNot { it.profileId == clean.profileId }
+        if (others.size >= Limits.MAX_FRIENDS) return LedgerResult.Rejected(Reason.LIMIT_REACHED)
+        if (state.friends.any { it == clean }) return LedgerResult.Ok(state, changed = false)
+        return LedgerResult.Ok(state.copy(friends = others + clean))
+    }
+
+    fun removeFriend(state: AppState, profileId: String): LedgerResult {
+        if (state.friends.none { it.profileId == profileId }) return LedgerResult.Ok(state, changed = false)
+        return LedgerResult.Ok(state.copy(friends = state.friends.filterNot { it.profileId == profileId }))
+    }
+
+    private fun validPetName(name: String): Boolean =
+        name.trim().length <= Limits.MAX_PET_NAME && name.none { it.isISOControl() }
+
     fun updateSettings(state: AppState, requested: Settings): LedgerResult {
         val settings = requested.copy(displayName = requested.displayName.trim())
         if (settings == state.settings) return LedgerResult.Ok(state, changed = false)
         val level = Gamification.level(state.contributions.size).number
         if (settings.reminderHour !in 0..23 ||
             settings.accent.unlockLevel > level ||
-            settings.displayName.length > Limits.MAX_DISPLAY_NAME
+            settings.displayName.length > Limits.MAX_DISPLAY_NAME ||
+            settings.profileId.length > Limits.MAX_PROFILE_ID
         ) {
             return LedgerResult.Rejected(Reason.INVALID_SETTINGS)
         }
@@ -182,6 +210,7 @@ object Ledger {
             if (validateGoalFields(g.name, g.targetMinor, g.currencyCode, g.months, g.paymentDay) != null) return null
             if (g.planBaseSavedMinor < 0 || g.planBaseSavedMinor > Limits.MAX_TARGET_MINOR) return null
             if (!GoalIcons.isValid(g.icon)) return null
+            if (!validPetName(g.petName)) return null
         }
         val goalIds = candidate.goals.map { it.id }.toSet()
         for (c in candidate.contributions) {
@@ -198,8 +227,13 @@ object Ledger {
             if (ChallengeType.fromId(ch.challengeId) == null) return null
             if (runCatching { YearMonth.parse(ch.month) }.isFailure) return null
         }
+        if (candidate.settings.profileId.length > Limits.MAX_PROFILE_ID) return null
+        if (candidate.collection.size > Pets.all.size || candidate.collection.any { !Pets.isKnown(it) }) return null
+        if (candidate.friends.size > Limits.MAX_FRIENDS) return null
+        val friends = candidate.friends.map { Friends.sanitize(it, today) ?: return null }
+        if (friends.map { it.profileId }.toSet().size != friends.size) return null
         // El estado de cada objetivo se recalcula a partir de sus aportaciones, no se confía en el archivo.
-        return candidate.goals.fold(candidate) { acc, g -> refreshStatus(acc, g.id) }
+        return Pets.discover(candidate.copy(friends = friends).let { c -> c.goals.fold(c) { acc, g -> refreshStatus(acc, g.id) } })
     }
 
     private fun validateGoalFields(name: String, targetMinor: Long, currency: String, months: Int, day: Int): Reason? =

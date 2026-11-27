@@ -5,6 +5,8 @@ import es.ahorra.core.ActiveChallenge
 import es.ahorra.core.GoalIcons
 import es.ahorra.core.AppState
 import es.ahorra.core.Contribution
+import es.ahorra.core.FriendCard
+import es.ahorra.core.PetCompanion
 import es.ahorra.core.ContributionKind
 import es.ahorra.core.Goal
 import es.ahorra.core.GoalStatus
@@ -31,6 +33,7 @@ data class GoalDto(
     val pausedSince: String? = null,
     val pausedMonths: List<String> = emptyList(),
     val icon: String = GoalIcons.DEFAULT,
+    val petName: String = "",
 )
 
 @Serializable
@@ -50,6 +53,22 @@ data class SettingsDto(
     val accent: String = "TEAL",
     val displayName: String = "",
     val welcomeSeen: Boolean = false,
+    val profileId: String = "",
+)
+
+@Serializable
+data class PetCompanionDto(val speciesId: String, val petName: String = "")
+
+@Serializable
+data class FriendDto(
+    val profileId: String,
+    val name: String,
+    val level: Int,
+    val bestStreak: Int,
+    val achievements: Int,
+    val collection: List<String> = emptyList(),
+    val companions: List<PetCompanionDto> = emptyList(),
+    val issuedOn: String,
 )
 
 @Serializable
@@ -62,6 +81,8 @@ data class StateDto(
     val contributions: List<ContributionDto> = emptyList(),
     val settings: SettingsDto = SettingsDto(),
     val challenges: List<ChallengeDto> = emptyList(),
+    val collection: List<String> = emptyList(),
+    val friends: List<FriendDto> = emptyList(),
 )
 
 object StorageFormat {
@@ -92,7 +113,7 @@ internal fun AppState.toDto() = StateDto(
             id = it.id, name = it.name, targetMinor = it.targetMinor, currencyCode = it.currencyCode,
             startDate = it.startDate.toString(), months = it.months, paymentDay = it.paymentDay,
             planBaseSavedMinor = it.planBaseSavedMinor, status = it.status.name,
-            pausedSince = it.pausedSince?.toString(), pausedMonths = it.pausedMonths, icon = it.icon,
+            pausedSince = it.pausedSince?.toString(), pausedMonths = it.pausedMonths, icon = it.icon, petName = it.petName,
         )
     },
     contributions = contributions.map {
@@ -103,9 +124,21 @@ internal fun AppState.toDto() = StateDto(
     },
     settings = SettingsDto(
         settings.remindersEnabled, settings.reminderHour, settings.accent.name,
-        settings.displayName, settings.welcomeSeen,
+        settings.displayName, settings.welcomeSeen, settings.profileId,
     ),
     challenges = challenges.map { ChallengeDto(it.challengeId, it.month) },
+    collection = collection,
+    friends = friends.map { it.toDto() },
+)
+
+internal fun FriendCard.toDto() = FriendDto(
+    profileId, name, level, bestStreak, achievements, collection,
+    companions.map { PetCompanionDto(it.speciesId, it.petName) }, issuedOn.toString(),
+)
+
+internal fun FriendDto.toDomain() = FriendCard(
+    profileId, name, level, bestStreak, achievements, collection,
+    companions.map { PetCompanion(it.speciesId, it.petName) }, LocalDate.parse(issuedOn),
 )
 
 internal fun StateDto.toDomain() = AppState(
@@ -115,7 +148,7 @@ internal fun StateDto.toDomain() = AppState(
             id = it.id, name = it.name, targetMinor = it.targetMinor, currencyCode = it.currencyCode,
             startDate = LocalDate.parse(it.startDate), months = it.months, paymentDay = it.paymentDay,
             planBaseSavedMinor = it.planBaseSavedMinor, status = GoalStatus.valueOf(it.status),
-            pausedSince = it.pausedSince?.let(LocalDate::parse), pausedMonths = it.pausedMonths, icon = it.icon,
+            pausedSince = it.pausedSince?.let(LocalDate::parse), pausedMonths = it.pausedMonths, icon = it.icon, petName = it.petName,
         )
     },
     contributions = contributions.map {
@@ -126,7 +159,9 @@ internal fun StateDto.toDomain() = AppState(
     },
     settings = Settings(
         settings.remindersEnabled, settings.reminderHour, Accent.valueOf(settings.accent),
-        settings.displayName, settings.welcomeSeen,
+        settings.displayName, settings.welcomeSeen, settings.profileId,
     ),
     challenges = challenges.map { ActiveChallenge(it.challengeId, it.month) },
+    collection = collection,
+    friends = friends.map { it.toDomain() },
 )

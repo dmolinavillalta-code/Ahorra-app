@@ -36,6 +36,9 @@ object Limits {
     const val MAX_GOALS = 100
     const val MAX_CONTRIBUTIONS = 20_000
     const val MAX_CHALLENGES = 240
+    const val MAX_PET_NAME = 20
+    const val MAX_FRIENDS = 50
+    const val MAX_PROFILE_ID = 40
     val MIN_DATE: LocalDate = LocalDate.of(2000, 1, 1)
 }
 
@@ -57,6 +60,8 @@ data class Goal(
     /** Meses (formato yyyy-MM) en los que el objetivo estuvo en pausa; no rompen la racha. */
     val pausedMonths: List<String> = emptyList(),
     val icon: String = GoalIcons.DEFAULT,
+    /** Nombre que la persona le pone a su mascota (opcional). */
+    val petName: String = "",
 )
 
 /** Solo existen aportaciones CONFIRMADAS por la persona: lo pendiente o simulado nunca se guarda como ahorro. */
@@ -76,6 +81,8 @@ data class Settings(
     /** Cómo quiere la persona que la llame la app. Solo se guarda en el móvil. */
     val displayName: String = "",
     val welcomeSeen: Boolean = false,
+    /** Identificador aleatorio para que un amigo pueda actualizar tu tarjeta sin duplicarla. No es una cuenta. */
+    val profileId: String = "",
 )
 
 /** Reto personal voluntario aceptado para un mes concreto (formato yyyy-MM). */
@@ -87,6 +94,10 @@ data class AppState(
     val contributions: List<Contribution> = emptyList(),
     val settings: Settings = Settings(),
     val challenges: List<ActiveChallenge> = emptyList(),
+    /** Especies descubiertas (se conservan aunque se borre el objetivo que las dio). */
+    val collection: List<String> = emptyList(),
+    /** Tarjetas de amigos importadas a mano: no hay servidor ni cuentas. */
+    val friends: List<FriendCard> = emptyList(),
 ) {
     companion object {
         const val CURRENT_VERSION = 1

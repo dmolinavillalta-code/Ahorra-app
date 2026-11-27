@@ -65,6 +65,7 @@ import es.ahorra.core.PinPolicy
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import es.ahorra.app.ui.theme.OnBrand
 
 // ---- Piezas comunes -------------------------------------------------------------------------------------------
 
@@ -89,9 +90,9 @@ private fun PinDots(filled: Int, shakeX: Float, error: Boolean) {
                     .clip(CircleShape)
                     .background(
                         when {
-                            error -> Color(0xFFFFB4AB)
-                            on -> Color.White
-                            else -> Color.White.copy(alpha = 0.30f)
+                            error -> Color(0xFFB3261E)
+                            on -> OnBrand
+                            else -> OnBrand.copy(alpha = 0.30f)
                         },
                     ),
             )
@@ -106,7 +107,7 @@ private fun PinKey(label: String, description: String? = null, enabled: Boolean 
         Modifier
             .size(76.dp)
             .clip(CircleShape)
-            .background(Color.White.copy(alpha = if (enabled) 0.16f else 0.06f))
+            .background(Color.White.copy(alpha = if (enabled) 0.38f else 0.16f))
             .clickable(enabled = enabled, role = Role.Button) {
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
@@ -114,7 +115,7 @@ private fun PinKey(label: String, description: String? = null, enabled: Boolean 
             .semantics { if (description != null) contentDescription = description },
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, color = Color.White, fontSize = 28.sp, style = MaterialTheme.typography.headlineMedium)
+        Text(label, color = OnBrand, fontSize = 28.sp, style = MaterialTheme.typography.headlineMedium)
     }
 }
 
@@ -242,15 +243,15 @@ fun LockScreen(vm: AhorraViewModel, displayName: String, config: LockConfig) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Spacer(Modifier.height(12.dp))
                 AnimatedVisibility(visible, enter = fadeIn(tween(600)) + slideInVertically(tween(700)) { -it / 2 }) {
-                    BrandMark(84.dp, Color.White.copy(alpha = 0.28f), Color.White.copy(alpha = 0.10f))
+                    BrandMark(84.dp, Color.White.copy(alpha = 0.60f), Color.White.copy(alpha = 0.25f))
                 }
                 Spacer(Modifier.height(18.dp))
                 AnimatedVisibility(visible, enter = fadeIn(tween(700, delayMillis = 200))) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(greeting, color = Color.White.copy(alpha = 0.85f), style = MaterialTheme.typography.titleLarge)
+                        Text(greeting, color = OnBrand.copy(alpha = 0.85f), style = MaterialTheme.typography.titleLarge)
                         Text(
                             displayName.ifBlank { stringResource(R.string.lock_default_name) },
-                            color = Color.White,
+                            color = OnBrand,
                             style = MaterialTheme.typography.displaySmall,
                             textAlign = TextAlign.Center,
                         )
@@ -260,7 +261,7 @@ fun LockScreen(vm: AhorraViewModel, displayName: String, config: LockConfig) {
                 AnimatedVisibility(visible, enter = fadeIn(tween(700, delayMillis = 400))) {
                     Text(
                         stringResource(R.string.lock_tagline),
-                        color = Color.White.copy(alpha = 0.78f),
+                        color = OnBrand.copy(alpha = 0.78f),
                         style = MaterialTheme.typography.bodyLarge,
                         textAlign = TextAlign.Center,
                     )
@@ -275,7 +276,7 @@ fun LockScreen(vm: AhorraViewModel, displayName: String, config: LockConfig) {
                         error -> stringResource(R.string.lock_wrong, attemptsLeft)
                         else -> stringResource(R.string.lock_enter_pin)
                     },
-                    color = Color.White.copy(alpha = 0.9f),
+                    color = OnBrand.copy(alpha = 0.9f),
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.height(24.dp),
@@ -410,7 +411,7 @@ fun SetPinScreen(vm: AhorraViewModel, mode: PinMode, onDone: () -> Unit, onCance
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
-                TextButton(onClick = onCancel, colors = ButtonDefaults.textButtonColors(contentColor = Color.White)) {
+                TextButton(onClick = onCancel, colors = ButtonDefaults.textButtonColors(contentColor = OnBrand)) {
                     Text("←  " + stringResource(R.string.action_back))
                 }
             }
@@ -423,13 +424,13 @@ fun SetPinScreen(vm: AhorraViewModel, mode: PinMode, onDone: () -> Unit, onCance
                     Text("👆", fontSize = 72.sp)
                     Text(
                         stringResource(R.string.biometric_offer_title),
-                        color = Color.White,
+                        color = OnBrand,
                         style = MaterialTheme.typography.headlineMedium,
                         textAlign = TextAlign.Center,
                     )
                     Text(
                         stringResource(R.string.biometric_offer_body),
-                        color = Color.White.copy(alpha = 0.85f),
+                        color = OnBrand.copy(alpha = 0.85f),
                         style = MaterialTheme.typography.bodyLarge,
                         textAlign = TextAlign.Center,
                     )
@@ -449,12 +450,12 @@ fun SetPinScreen(vm: AhorraViewModel, mode: PinMode, onDone: () -> Unit, onCance
                             }
                         },
                         modifier = Modifier.fillMaxWidth().height(52.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = brand.gradientStart),
+                        colors = ButtonDefaults.buttonColors(containerColor = OnBrand, contentColor = brand.gradientStart),
                     ) { Text(stringResource(R.string.biometric_enable)) }
                     TextButton(
                         onClick = onDone,
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
+                        colors = ButtonDefaults.textButtonColors(contentColor = OnBrand),
                     ) { Text(stringResource(R.string.biometric_not_now)) }
                 }
             } else {
@@ -467,13 +468,13 @@ fun SetPinScreen(vm: AhorraViewModel, mode: PinMode, onDone: () -> Unit, onCance
                     Text("🔒", fontSize = 48.sp)
                     Text(
                         stringResource(title),
-                        color = Color.White,
+                        color = OnBrand,
                         style = MaterialTheme.typography.headlineMedium,
                         textAlign = TextAlign.Center,
                     )
                     Text(
                         stringResource(if (step == PinStep.NEW) R.string.pin_rules else R.string.pin_never_recoverable),
-                        color = Color.White.copy(alpha = 0.8f),
+                        color = OnBrand.copy(alpha = 0.8f),
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
                     )
@@ -482,7 +483,7 @@ fun SetPinScreen(vm: AhorraViewModel, mode: PinMode, onDone: () -> Unit, onCance
                     PinDots(filled = pin.length, shakeX = shake.value, error = error)
                     Text(
                         text = message?.let { stringResource(it, messageArg) } ?: "",
-                        color = Color.White.copy(alpha = 0.95f),
+                        color = OnBrand.copy(alpha = 0.95f),
                         style = MaterialTheme.typography.bodyLarge,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.height(24.dp),

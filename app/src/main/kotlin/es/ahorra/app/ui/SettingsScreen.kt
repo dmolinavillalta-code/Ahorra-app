@@ -54,8 +54,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import es.ahorra.app.R
 import es.ahorra.app.data.LockConfig
-import es.ahorra.app.ui.theme.swatch
-import es.ahorra.core.Accent
 import es.ahorra.core.AppState
 import es.ahorra.core.Gamification
 import es.ahorra.core.Limits
@@ -231,39 +229,6 @@ fun SettingsScreen(data: AppState, vm: AhorraViewModel, onPinMode: (PinMode) -> 
                     }
                 }
                 Text(stringResource(R.string.settings_reminder_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        }
-
-        // ---- Apariencia ----
-        SettingsCard(stringResource(R.string.settings_appearance), "🎨") {
-            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                Accent.entries.forEach { accent ->
-                    val unlocked = accent.unlockLevel <= level
-                    val selected = settings.accent == accent
-                    val label = stringResource(accent.labelRes())
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(
-                            Modifier
-                                .size(48.dp)
-                                .clip(CircleShape)
-                                .background(accent.swatch().copy(alpha = if (unlocked) 1f else 0.30f))
-                                .then(
-                                    if (selected) Modifier.border(BorderStroke(3.dp, MaterialTheme.colorScheme.onSurface), CircleShape)
-                                    else Modifier,
-                                )
-                                .clickable(enabled = unlocked, role = Role.RadioButton) {
-                                    vm.applySettings(settings.copy(accent = accent))
-                                }
-                                .semantics { contentDescription = label },
-                            contentAlignment = Alignment.Center,
-                        ) { if (!unlocked) Text("🔒") }
-                        Text(
-                            if (unlocked) label else stringResource(R.string.settings_unlock_level, accent.unlockLevel),
-                            style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier.padding(top = 4.dp),
-                        )
-                    }
-                }
             }
         }
 

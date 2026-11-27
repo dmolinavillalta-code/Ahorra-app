@@ -39,8 +39,11 @@ import es.ahorra.core.Goal
 import es.ahorra.core.GoalStatus
 import es.ahorra.core.Ledger
 import es.ahorra.core.PlanCalculator
+import es.ahorra.core.Pets
+import es.ahorra.core.Species
 import es.ahorra.core.Summary
 import java.time.LocalDate
+import es.ahorra.app.ui.theme.OnBrand
 
 /** Pestaña "Hoy": resumen con degradado, nivel y racha, y los objetivos como tarjetas. */
 @Composable
@@ -83,7 +86,7 @@ fun HomeScreen(
                 item { EmptyState() }
             }
             items(data.goals, key = { it.id }) { goal ->
-                GoalCard(goal, Ledger.savedMinor(data, goal.id), today) { onOpenGoal(goal.id) }
+                GoalCard(goal, Ledger.savedMinor(data, goal.id), Pets.companionOf(data, goal), today) { onOpenGoal(goal.id) }
             }
         }
     }
@@ -103,37 +106,37 @@ private fun HeroCard(name: String, summaries: List<CurrencySummary>, levelNumber
     ) {
         Text(
             if (name.isBlank()) stringResource(greetingRes()) else stringResource(greetingRes()) + ", " + name,
-            color = Color.White.copy(alpha = 0.85f),
+            color = OnBrand.copy(alpha = 0.85f),
             style = MaterialTheme.typography.titleMedium,
         )
         if (summaries.isEmpty()) {
-            Text(stringResource(R.string.hero_empty), color = Color.White, style = MaterialTheme.typography.headlineSmall)
+            Text(stringResource(R.string.hero_empty), color = OnBrand, style = MaterialTheme.typography.headlineSmall)
         } else {
-            Text(stringResource(R.string.hero_saved_label), color = Color.White.copy(alpha = 0.75f), style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.hero_saved_label), color = OnBrand.copy(alpha = 0.75f), style = MaterialTheme.typography.labelLarge)
             summaries.forEachIndexed { index, summary ->
                 AnimatedMoney(
                     minor = summary.savedMinor,
                     currencyCode = summary.currencyCode,
                     style = if (index == 0) MaterialTheme.typography.displaySmall else MaterialTheme.typography.headlineSmall,
-                    color = Color.White,
+                    color = OnBrand,
                 )
                 Text(
                     stringResource(R.string.home_of_target, money(summary.targetMinor, summary.currencyCode)),
-                    color = Color.White.copy(alpha = 0.8f),
+                    color = OnBrand.copy(alpha = 0.8f),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 val fraction = if (summary.targetMinor > 0) summary.savedMinor.toFloat() / summary.targetMinor else 0f
                 ProgressBar(
                     fraction = fraction,
                     description = stringResource(R.string.home_progress, (fraction * 100).toInt().coerceIn(0, 100)),
-                    trackColor = Color.White.copy(alpha = 0.22f),
-                    barBrush = androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(Color.White.copy(alpha = 0.8f), Color.White)),
+                    trackColor = OnBrand.copy(alpha = 0.22f),
+                    barBrush = androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(OnBrand.copy(alpha = 0.8f), OnBrand)),
                     thickness = 8.dp,
                 )
                 if (summary.monthlyMinor > 0) {
                     Text(
                         stringResource(R.string.hero_monthly, money(summary.monthlyMinor, summary.currencyCode)),
-                        color = Color.White.copy(alpha = 0.9f),
+                        color = OnBrand.copy(alpha = 0.9f),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
@@ -183,7 +186,7 @@ private fun EmptyState() {
 
 /** Tarjeta de un objetivo: icono, nombre, anillo de progreso y estado del plan. */
 @Composable
-fun GoalCard(goal: Goal, saved: Long, today: LocalDate, onClick: () -> Unit) {
+fun GoalCard(goal: Goal, saved: Long, pet: Species, today: LocalDate, onClick: () -> Unit) {
     val basisPoints = PlanCalculator.progressBasisPoints(saved, goal.targetMinor)
     val percentText = stringResource(R.string.home_progress, basisPoints / 100)
     val next = remember(goal, saved, today) { PlanCalculator.nextPayment(goal, saved, today) }
@@ -209,16 +212,16 @@ fun GoalCard(goal: Goal, saved: Long, today: LocalDate, onClick: () -> Unit) {
                 trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
                 startColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.55f),
                 endColor = MaterialTheme.colorScheme.primary,
-            ) { Text(goalEmoji(goal.icon), fontSize = 28.sp) }
+            ) { Text(pet.emoji(), fontSize = 30.sp) }
 
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(goal.name, style = MaterialTheme.typography.titleMedium, maxLines = 1)
+                Text(goalEmoji(goal.icon) + " " + goal.name, style = MaterialTheme.typography.titleMedium, maxLines = 1)
                 Text(
                     money(saved, goal.currencyCode) + " " + stringResource(R.string.home_of_target, money(goal.targetMinor, goal.currencyCode)),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Text(percentText, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                Text(percentText, style = MaterialTheme.typography.labelLarge, color = LocalBrand.current.accentText)
                 when (goal.status) {
                     GoalStatus.COMPLETED -> Text(
                         "🏆 " + stringResource(R.string.home_status_completed),

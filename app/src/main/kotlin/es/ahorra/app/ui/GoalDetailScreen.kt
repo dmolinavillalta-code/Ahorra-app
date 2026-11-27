@@ -66,10 +66,12 @@ import es.ahorra.core.LedgerResult
 import es.ahorra.core.Limits
 import es.ahorra.core.MoneyMath
 import es.ahorra.core.PlanCalculator
+import es.ahorra.core.Pets
 import es.ahorra.core.ProgressSeries
 import es.ahorra.core.Reason
 import java.time.LocalDate
 import java.util.UUID
+import es.ahorra.app.ui.theme.OnBrand
 
 private data class PendingContribution(val amountMinor: Long, val note: String, val extra: Boolean)
 
@@ -90,6 +92,7 @@ fun GoalDetailScreen(data: AppState, vm: AhorraViewModel, goalId: String, onBack
     val schedule = remember(goal) { PlanCalculator.schedule(goal) }
     val series = remember(data, goal) { ProgressSeries.build(goal, data.contributions, today) }
     val next = PlanCalculator.nextPayment(goal, saved, today)
+    val pet = Pets.companionOf(data, goal)
     val basisPoints = PlanCalculator.progressBasisPoints(saved, goal.targetMinor)
 
     var showForm by remember { mutableStateOf(false) }
@@ -104,6 +107,7 @@ fun GoalDetailScreen(data: AppState, vm: AhorraViewModel, goalId: String, onBack
     var errorReason by remember { mutableStateOf<Reason?>(null) }
     var confetti by remember { mutableIntStateOf(0) }
     var newAchievements by remember { mutableStateOf<List<Achievement>>(emptyList()) }
+    var evolvedTo by remember { mutableStateOf<es.ahorra.core.Species?>(null) }
 
     LaunchedEffect(goal.status) {
         if (goal.status == GoalStatus.COMPLETED && !celebrated) {
@@ -136,18 +140,23 @@ fun GoalDetailScreen(data: AppState, vm: AhorraViewModel, goalId: String, onBack
                     ) {
                         ProgressRing(fraction = basisPoints / 10_000f, diameter = 190.dp, strokeWidth = 16.dp) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(goalEmoji(goal.icon), fontSize = 40.sp)
+                                PetAvatar(pet, 104.dp)
                                 Text(
                                     stringResource(R.string.home_progress, basisPoints / 100),
-                                    color = Color.White,
+                                    color = OnBrand,
                                     style = MaterialTheme.typography.titleMedium,
                                 )
                             }
                         }
-                        AnimatedMoney(saved, goal.currencyCode, MaterialTheme.typography.displaySmall, color = Color.White)
+                        Text(
+                            goal.petName.ifBlank { stringResource(pet.nameRes()) } + " · " + stringResource(pet.rarity.labelRes()),
+                            color = OnBrand,
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        AnimatedMoney(saved, goal.currencyCode, MaterialTheme.typography.displaySmall, color = OnBrand)
                         Text(
                             stringResource(R.string.home_of_target, money(goal.targetMinor, goal.currencyCode)),
-                            color = Color.White.copy(alpha = 0.85f),
+                            color = OnBrand.copy(alpha = 0.85f),
                             style = MaterialTheme.typography.bodyLarge,
                         )
                         when (goal.status) {
@@ -161,7 +170,7 @@ fun GoalDetailScreen(data: AppState, vm: AhorraViewModel, goalId: String, onBack
                                     Text(
                                         if (next.overdue) stringResource(R.string.home_overdue, amount, date)
                                         else stringResource(R.string.home_next_payment, amount, date),
-                                        color = Color.White.copy(alpha = 0.9f),
+                                        color = OnBrand.copy(alpha = 0.9f),
                                         style = MaterialTheme.typography.bodyMedium,
                                         textAlign = TextAlign.Center,
                                     )
@@ -169,7 +178,7 @@ fun GoalDetailScreen(data: AppState, vm: AhorraViewModel, goalId: String, onBack
                                 PlanCalculator.estimatedCompletion(goal)?.let { end ->
                                     Text(
                                         stringResource(R.string.home_estimated_end, end.pretty()),
-                                        color = Color.White.copy(alpha = 0.75f),
+                                        color = OnBrand.copy(alpha = 0.75f),
                                         style = MaterialTheme.typography.bodySmall,
                                         textAlign = TextAlign.Center,
                                     )
@@ -229,7 +238,7 @@ fun GoalDetailScreen(data: AppState, vm: AhorraViewModel, goalId: String, onBack
                                         .height(150.dp),
                                 )
                                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                    Text("━ " + stringResource(R.string.chart_actual), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium)
+                                    Text("━ " + stringResource(R.string.chart_actual), color = LocalBrand.current.accentText, style = MaterialTheme.typography.labelMedium)
                                     Text("┅ " + stringResource(R.string.chart_plan), color = MaterialTheme.colorScheme.outline, style = MaterialTheme.typography.labelMedium)
                                 }
                             }
@@ -307,6 +316,7 @@ fun GoalDetailScreen(data: AppState, vm: AhorraViewModel, goalId: String, onBack
                 showForm = false
                 val now = LocalDate.now()
                 val before = Gamification.achievements(data, now)
+                val petBefore = Pets.companionOf(data, goal)
                 val contribution = Contribution(
                     id = contributionId,
                     goalId = goal.id,
@@ -322,6 +332,11 @@ fun GoalDetailScreen(data: AppState, vm: AhorraViewModel, goalId: String, onBack
                             if (result.changed) {
                                 val after = Gamification.achievements(result.state, now)
                                 newAchievements = (after - before).toList().sorted()
+                                val goalAfter = result.state.goals.firstOrNull { it.id == goal.id }
+                                if (goalAfter != null) {
+                                    val petAfter = Pets.companionOf(result.state, goalAfter)
+                                    if (petAfter.rarity != petBefore.rarity) evolvedTo = petAfter
+                                }
                                 confetti++
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             }
@@ -368,7 +383,10 @@ fun GoalDetailScreen(data: AppState, vm: AhorraViewModel, goalId: String, onBack
             },
         )
     }
-    if (showCelebration) {
+    val evolved = evolvedTo
+    if (evolved != null) {
+        EvolutionDialog(evolved, goal.petName) { evolvedTo = null }
+    } else if (showCelebration) {
         CelebrationDialog(goal.name) { showCelebration = false }
     } else if (newAchievements.isNotEmpty()) {
         AchievementDialog(newAchievements) { newAchievements = emptyList() }
@@ -510,6 +528,35 @@ private fun CelebrationDialog(goalName: String, onDismiss: () -> Unit) {
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("🎉", fontSize = 56.sp, modifier = Modifier.scale(scale))
                 Text(stringResource(R.string.celebration_body, goalName), textAlign = TextAlign.Center)
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_ok)) } },
+    )
+}
+
+/** La mascota ha subido de rareza gracias al progreso o la constancia. */
+@Composable
+private fun EvolutionDialog(species: es.ahorra.core.Species, petName: String, onDismiss: () -> Unit) {
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { visible = true }
+    val scale by animateFloatAsState(
+        targetValue = if (visible) 1f else 0.2f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+        label = "evolution",
+    )
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.evolution_title)) },
+        text = {
+            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Box(Modifier.scale(scale)) { PetAvatar(species, 140.dp) }
+                Text(
+                    petName.ifBlank { stringResource(species.nameRes()) },
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center,
+                )
+                RarityChip(species.rarity)
+                Text(stringResource(R.string.evolution_body, stringResource(species.rarity.labelRes())), textAlign = TextAlign.Center)
             }
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_ok)) } },

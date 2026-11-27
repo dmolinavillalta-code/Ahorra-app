@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import es.ahorra.app.R
 import es.ahorra.core.GoalIcons
+import es.ahorra.app.ui.theme.OnBrand
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,10 +89,10 @@ fun GlassPill(text: String, modifier: Modifier = Modifier) {
     Box(
         modifier
             .clip(CircleShape)
-            .background(Color.White.copy(alpha = 0.18f))
+            .background(Color.White.copy(alpha = 0.45f))
             .padding(horizontal = 12.dp, vertical = 6.dp),
     ) {
-        Text(text, color = Color.White, style = MaterialTheme.typography.labelLarge)
+        Text(text, color = OnBrand, style = MaterialTheme.typography.labelLarge)
     }
 }
 

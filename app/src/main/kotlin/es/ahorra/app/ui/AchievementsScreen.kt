@@ -40,6 +40,7 @@ import es.ahorra.core.Challenges
 import es.ahorra.core.Gamification
 import es.ahorra.core.Ledger
 import java.time.LocalDate
+import es.ahorra.app.ui.theme.OnBrand
 
 /** Pestaña "Logros": nivel, racha, retos voluntarios del mes y galería de insignias. */
 @Composable
@@ -71,25 +72,25 @@ fun AchievementsScreen(data: AppState, vm: AhorraViewModel) {
             ) {
                 Text(
                     stringResource(R.string.level_label, level.number),
-                    color = Color.White.copy(alpha = 0.8f),
+                    color = OnBrand.copy(alpha = 0.8f),
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
                     stringResource(levelNameRes(level.number)),
-                    color = Color.White,
+                    color = OnBrand,
                     style = MaterialTheme.typography.displaySmall,
                 )
                 ProgressBar(
                     fraction = fraction,
                     description = stringResource(R.string.level_label, level.number),
-                    trackColor = Color.White.copy(alpha = 0.22f),
-                    barBrush = Brush.horizontalGradient(listOf(Color.White.copy(alpha = 0.8f), Color.White)),
+                    trackColor = OnBrand.copy(alpha = 0.22f),
+                    barBrush = Brush.horizontalGradient(listOf(OnBrand.copy(alpha = 0.8f), OnBrand)),
                     thickness = 10.dp,
                 )
                 val next = level.contributionsToNext
                 Text(
                     if (next != null) stringResource(R.string.level_next, next) else stringResource(R.string.level_max),
-                    color = Color.White.copy(alpha = 0.9f),
+                    color = OnBrand.copy(alpha = 0.9f),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 6.dp)) {
@@ -195,7 +196,7 @@ private fun ActiveChallengeCard(progress: ChallengeProgress, onDismiss: () -> Un
                     if (progress.completed) stringResource(R.string.challenge_done)
                     else stringResource(R.string.challenge_progress, progress.current, progress.target),
                     style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = LocalBrand.current.accentText,
                     modifier = Modifier.weight(1f),
                 )
                 if (!progress.completed) {

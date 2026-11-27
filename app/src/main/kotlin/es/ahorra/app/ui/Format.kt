@@ -8,6 +8,8 @@ import es.ahorra.core.Accent
 import es.ahorra.core.Achievement
 import es.ahorra.core.ChallengeType
 import es.ahorra.core.MoneyMath
+import es.ahorra.core.Rarity
+import es.ahorra.core.Species
 import es.ahorra.core.Reason
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -146,6 +148,65 @@ fun Accent.labelRes(): Int = when (this) {
     Accent.ROSE -> R.string.accent_rose
     Accent.EMERALD -> R.string.accent_emerald
     Accent.VIOLET -> R.string.accent_violet
+}
+
+fun Species.emoji(): String = when (id) {
+    "chick" -> "🐥"
+    "bunny" -> "🐰"
+    "kitten" -> "🐱"
+    "puppy" -> "🐶"
+    "hamster" -> "🐹"
+    "froglet" -> "🐸"
+    "fox" -> "🦊"
+    "panda" -> "🐼"
+    "koala" -> "🐨"
+    "owl" -> "🦉"
+    "penguin" -> "🐧"
+    "unicorn" -> "🦄"
+    "octopus" -> "🐙"
+    "peacock" -> "🦚"
+    "wolf" -> "🐺"
+    "lion" -> "🦁"
+    "dragon" -> "🐉"
+    else -> "🐋"
+}
+
+@StringRes
+fun Species.nameRes(): Int = when (id) {
+    "chick" -> R.string.pet_chick
+    "bunny" -> R.string.pet_bunny
+    "kitten" -> R.string.pet_kitten
+    "puppy" -> R.string.pet_puppy
+    "hamster" -> R.string.pet_hamster
+    "froglet" -> R.string.pet_froglet
+    "fox" -> R.string.pet_fox
+    "panda" -> R.string.pet_panda
+    "koala" -> R.string.pet_koala
+    "owl" -> R.string.pet_owl
+    "penguin" -> R.string.pet_penguin
+    "unicorn" -> R.string.pet_unicorn
+    "octopus" -> R.string.pet_octopus
+    "peacock" -> R.string.pet_peacock
+    "wolf" -> R.string.pet_wolf
+    "lion" -> R.string.pet_lion
+    "dragon" -> R.string.pet_dragon
+    else -> R.string.pet_whale
+}
+
+@StringRes
+fun Rarity.labelRes(): Int = when (this) {
+    Rarity.COMMON -> R.string.rarity_common
+    Rarity.RARE -> R.string.rarity_rare
+    Rarity.EPIC -> R.string.rarity_epic
+    Rarity.LEGENDARY -> R.string.rarity_legendary
+}
+
+@StringRes
+fun Rarity.howRes(): Int = when (this) {
+    Rarity.COMMON -> R.string.rarity_how_common
+    Rarity.RARE -> R.string.rarity_how_rare
+    Rarity.EPIC -> R.string.rarity_how_epic
+    Rarity.LEGENDARY -> R.string.rarity_how_legendary
 }
 
 private const val MAX_IMPORT_BYTES = 10 * 1024 * 1024

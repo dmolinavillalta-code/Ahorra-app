@@ -36,7 +36,6 @@ import es.ahorra.app.R
 import es.ahorra.app.data.Gate
 import es.ahorra.app.data.RepoState
 import es.ahorra.app.ui.theme.AhorraTheme
-import es.ahorra.core.Accent
 import es.ahorra.core.AppState
 
 private object Routes {
@@ -53,10 +52,9 @@ fun AhorraRoot(vm: AhorraViewModel = viewModel()) {
     val repoState by vm.repoState.collectAsStateWithLifecycle()
     val gate by vm.gate.collectAsStateWithLifecycle()
     val lockConfig by vm.lockConfig.collectAsStateWithLifecycle()
-    val accent = (repoState as? RepoState.Ready)?.data?.settings?.accent ?: Accent.TEAL
     val name = (repoState as? RepoState.Ready)?.data?.settings?.displayName.orEmpty()
 
-    AhorraTheme(accent = accent) {
+    AhorraTheme {
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             // El bloqueo manda sobre todo lo demás: mientras esté cerrado no se compone ningún dato.
             Crossfade(targetState = gate, animationSpec = tween(450), label = "gate") { g ->
@@ -150,6 +148,8 @@ private fun MainTabs(
             NavigationBar(containerColor = MaterialTheme.colorScheme.surfaceContainerLowest) {
                 listOf(
                     "🏠" to R.string.tab_today,
+                    "🐣" to R.string.tab_pets,
+                    "🤝" to R.string.tab_friends,
                     "🏅" to R.string.tab_achievements,
                     "⚙️" to R.string.tab_settings,
                 ).forEachIndexed { index, (emoji, label) ->
@@ -167,7 +167,9 @@ private fun MainTabs(
             Crossfade(targetState = tab, animationSpec = tween(250), label = "tabs") { current ->
                 when (current) {
                     0 -> HomeScreen(data, onOpenGoal, onNewGoal)
-                    1 -> AchievementsScreen(data, vm)
+                    1 -> PetsScreen(data, vm)
+                    2 -> FriendsScreen(data, vm)
+                    3 -> AchievementsScreen(data, vm)
                     else -> SettingsScreen(data, vm, onPinMode, onWiped = { tab = 0 })
                 }
             }

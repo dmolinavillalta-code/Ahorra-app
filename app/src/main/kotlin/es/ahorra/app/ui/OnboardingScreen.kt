@@ -49,6 +49,7 @@ import es.ahorra.app.ui.theme.LocalBrand
 import es.ahorra.core.Limits
 import es.ahorra.core.Settings
 import kotlinx.coroutines.launch
+import es.ahorra.app.ui.theme.OnBrand
 
 private const val PAGES = 3
 
@@ -85,7 +86,7 @@ fun OnboardingScreen(
                 if (pager.currentPage < PAGES - 1) {
                     TextButton(
                         onClick = { scope.launch { pager.animateScrollToPage(PAGES - 1) } },
-                        colors = ButtonDefaults.textButtonColors(contentColor = Color.White),
+                        colors = ButtonDefaults.textButtonColors(contentColor = OnBrand),
                     ) { Text(stringResource(R.string.onboarding_skip)) }
                 } else {
                     Spacer(Modifier.height(48.dp))
@@ -121,7 +122,7 @@ fun OnboardingScreen(
                             .padding(horizontal = 4.dp)
                             .size(width = width.dp, height = 8.dp)
                             .clip(CircleShape)
-                            .background(Color.White.copy(alpha = if (selected) 1f else 0.4f)),
+                            .background(OnBrand.copy(alpha = if (selected) 1f else 0.4f)),
                     )
                 }
             }
@@ -132,7 +133,7 @@ fun OnboardingScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(54.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = brand.gradientStart),
+                    colors = ButtonDefaults.buttonColors(containerColor = OnBrand, contentColor = brand.gradientStart),
                 ) { Text(stringResource(R.string.onboarding_next), style = MaterialTheme.typography.titleMedium) }
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -141,14 +142,14 @@ fun OnboardingScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(54.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = brand.gradientStart),
+                        colors = ButtonDefaults.buttonColors(containerColor = OnBrand, contentColor = brand.gradientStart),
                     ) { Text(stringResource(R.string.onboarding_start), style = MaterialTheme.typography.titleMedium) }
                     OutlinedButton(
                         onClick = { finish(true) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(54.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = OnBrand),
                     ) { Text(stringResource(R.string.onboarding_protect)) }
                 }
             }
@@ -158,23 +159,23 @@ fun OnboardingScreen(
 
 @Composable
 private fun WelcomePage() {
-    BrandMark(132.dp, Color.White.copy(alpha = 0.30f), Color.White.copy(alpha = 0.10f))
+    BrandMark(132.dp, Color.White.copy(alpha = 0.60f), Color.White.copy(alpha = 0.25f))
     Spacer(Modifier.height(28.dp))
     Text(
         stringResource(R.string.onboarding_welcome),
-        color = Color.White.copy(alpha = 0.85f),
+        color = OnBrand.copy(alpha = 0.85f),
         style = MaterialTheme.typography.titleLarge,
     )
     Text(
         stringResource(R.string.app_name),
-        color = Color.White,
+        color = OnBrand,
         fontSize = 52.sp,
         style = MaterialTheme.typography.displaySmall,
     )
     Spacer(Modifier.height(12.dp))
     Text(
         stringResource(R.string.onboarding_tagline),
-        color = Color.White.copy(alpha = 0.9f),
+        color = OnBrand.copy(alpha = 0.9f),
         style = MaterialTheme.typography.bodyLarge,
         textAlign = TextAlign.Center,
         modifier = Modifier.padding(horizontal = 12.dp),
@@ -185,7 +186,7 @@ private fun WelcomePage() {
 private fun HowItWorksPage() {
     Text(
         stringResource(R.string.onboarding_how_title),
-        color = Color.White,
+        color = OnBrand,
         style = MaterialTheme.typography.headlineMedium,
         textAlign = TextAlign.Center,
     )
@@ -203,15 +204,15 @@ private fun FeatureRow(emoji: String, title: Int, body: Int) {
         Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(22.dp))
-            .background(Color.White.copy(alpha = 0.14f))
+            .background(Color.White.copy(alpha = 0.40f))
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         Text(emoji, fontSize = 32.sp)
         Column {
-            Text(stringResource(title), color = Color.White, style = MaterialTheme.typography.titleMedium)
-            Text(stringResource(body), color = Color.White.copy(alpha = 0.85f), style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(title), color = OnBrand, style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(body), color = OnBrand.copy(alpha = 0.85f), style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
@@ -222,14 +223,14 @@ private fun NamePage(name: String, onName: (String) -> Unit) {
     Spacer(Modifier.height(12.dp))
     Text(
         stringResource(R.string.onboarding_name_title),
-        color = Color.White,
+        color = OnBrand,
         style = MaterialTheme.typography.headlineMedium,
         textAlign = TextAlign.Center,
     )
     Spacer(Modifier.height(8.dp))
     Text(
         stringResource(R.string.onboarding_name_body),
-        color = Color.White.copy(alpha = 0.85f),
+        color = OnBrand.copy(alpha = 0.85f),
         style = MaterialTheme.typography.bodyMedium,
         textAlign = TextAlign.Center,
     )
@@ -242,13 +243,13 @@ private fun NamePage(name: String, onName: (String) -> Unit) {
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         modifier = Modifier.fillMaxWidth(),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedTextColor = Color.White,
-            unfocusedTextColor = Color.White,
-            focusedBorderColor = Color.White,
-            unfocusedBorderColor = Color.White.copy(alpha = 0.55f),
-            focusedLabelColor = Color.White,
-            unfocusedLabelColor = Color.White.copy(alpha = 0.75f),
-            cursorColor = Color.White,
+            focusedTextColor = OnBrand,
+            unfocusedTextColor = OnBrand,
+            focusedBorderColor = OnBrand,
+            unfocusedBorderColor = OnBrand.copy(alpha = 0.55f),
+            focusedLabelColor = OnBrand,
+            unfocusedLabelColor = OnBrand.copy(alpha = 0.75f),
+            cursorColor = OnBrand,
         ),
     )
 }
