@@ -31,6 +31,8 @@
 | Copia exportada robada | Exportación cifrada con contraseña (mínimo 8 caracteres, PBKDF2 210.000 + AES-GCM, cabecera autenticada) | Una contraseña débil se puede adivinar sin límite fuera del móvil; la contraseña olvidada no se recupera |
 | Copia sin cifrar | Aviso explícito antes de guardarla | Decisión de la persona |
 | Archivo de importación manipulado | Validación completa (`sanitizeImport`), tamaño máximo 10 MB, rechazo si algo no cuadra | — |
+| Tarjeta de amigo falsificada o malformada | Se valida como entrada no fiable (especies conocidas, longitudes, sin caracteres de control, tamaño máximo); no ejecuta nada | No está firmada: puede mentir sobre el progreso. Solo sirve entre amigos, sin recompensas |
+| Fuga de datos al compartir | La tarjeta no lleva importes, nombres de objetivos ni fechas; la persona elige destino y puede verla antes | Quien la recibe conoce tu nombre y tus mascotas |
 | Presión psicológica de la gamificación | Sin dinero, sin azar, sin castigos; retos opcionales y sin consecuencia; romper una racha no quita nada | — |
 
 ## Detección y respuesta a incidentes

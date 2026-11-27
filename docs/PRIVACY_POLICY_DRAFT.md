@@ -42,7 +42,7 @@ de Datos (www.aepd.es).
 [A DECIDIR CON ASESOR: edad mínima de uso y declaración en Google Play.]
 
 ## 9. Seguridad
-Cifrado AES-256-GCM con clave en el almacén seguro de Android. Bloqueo opcional con PIN (guardado solo como hash con sal) y huella, y opción de ocultar el contenido en capturas. Ninguna medida es infalible: consulta los riesgos residuales
+Cifrado AES-256-GCM con clave en el almacén seguro de Android. Función "Amigos" sin servidor: la tarjeta (nombre, nivel, racha, logros y mascotas, sin importes ni objetivos) solo sale del móvil si tú la compartes con la app que elijas. Bloqueo opcional con PIN (guardado solo como hash con sal) y huella, y opción de ocultar el contenido en capturas. Ninguna medida es infalible: consulta los riesgos residuales
 en el documento técnico `THREAT_MODEL.md`.
 
 ## 10. Cambios

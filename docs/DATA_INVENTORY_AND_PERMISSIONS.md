@@ -8,6 +8,8 @@
 | Cantidad objetivo, moneda, plazo, día de pago | Calcular el plan | idem | idem | No | Sí |
 | Aportaciones (importe, fecha, nota, tipo) | Progreso e historial | idem | idem | No | Sí |
 | Ajustes (recordatorios, hora, acento, nombre opcional para saludar, bienvenida vista) | Preferencias | idem | idem | No | Sí |
+| Nombre de la mascota de cada objetivo, colección de mascotas descubiertas e identificador aleatorio de perfil (no es una cuenta) | Juego y compartir tarjeta | `files/ahorra.dat` | AES-256-GCM | No | Sí |
+| Tarjetas de amigos (nombre, nivel, racha, logros y mascotas; nunca importes ni nombres de objetivos) | Función "Amigos" | `files/ahorra.dat` | AES-256-GCM | No (el amigo la envía a mano) | Sí (quitar amigo o borrar datos) |
 | Icono del objetivo y retos aceptados | Personalización y motivación | idem | idem | No | Sí |
 | PIN (solo sal aleatoria + hash PBKDF2-HMAC-SHA256, 100.000 iteraciones), ajustes de bloqueo y contador de intentos | Bloqueo de la app | `files/lock.dat` | AES-256-GCM (misma clave del Keystore) | No | Sí (quitar el PIN o borrar datos) |
 | Clave AES | Cifrar el archivo | Android Keystore | Protegida por hardware si existe | No (no exportable) | Sí (al borrar datos) |
@@ -20,6 +22,8 @@ dispositivo o publicitarios, datos bancarios, números de tarjeta, analítica, i
 `grep -rn "Log\." app/src` → sin resultados). Las notificaciones usan versión pública sin importes en pantalla bloqueada.
 
 **Datos en el archivo exportado:** la exportación recomendada va **cifrada con una contraseña** que elige la persona (PBKDF2 210.000 iteraciones + AES-256-GCM; la contraseña no se guarda ni se puede recuperar). También existe la opción de exportar en JSON **sin cifrar**, con aviso previo.
+
+**Compartir tarjeta:** al pulsar "Compartir mi tarjeta" se abre el selector de apps de Android con un texto (`AHORRA-AMIGO1:…`). La app no se conecta a ningún servidor ni tiene permiso de Internet; a dónde se envía lo decide la persona. La tarjeta no está firmada.
 
 **Pantalla:** con "Ocultar contenido" activado se usa `FLAG_SECURE` (sin capturas ni vista previa en apps recientes).
 

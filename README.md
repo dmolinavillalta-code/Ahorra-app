@@ -11,12 +11,14 @@ calcula tu aportación mensual, registra tu progreso y te motiva con rachas, niv
 
 | | |
 |---|---|
-| Núcleo de negocio (`core/`) | ✅ Compilado y probado: **72 pruebas pasan** (también en CI) |
+| Núcleo de negocio (`core/`) | ✅ Compilado y probado: **82 pruebas pasan** (también en CI) |
 | App Android (Compose) | ✅ **Compila, pasa lint y pruebas unitarias en GitHub Actions** |
 | Interfaz en dispositivo real | ⚠️ Pruebas automáticas mínimas en emulador; **sin revisión manual en móviles distintos, accesibilidad ni rendimiento** |
 | Capa Android de bloqueo (`LockStore`, `LockController`) | ⚠️ Sin pruebas automáticas (la lógica de PIN/bloqueo sí está probada en `core`) |
 | APK de prueba | ✅ Firmado con una clave de **depuración** pública del repositorio: solo para uso personal |
 | AAB de publicación y Google Play | ❌ No realizados: requieren tu clave de firma y tu cuenta de desarrollador (ver `docs/PLAY_STORE_GUIDE.md`) |
+
+Fase 2.1: mascotas coleccionables (se incuban manteniendo pulsado al crear un objetivo; rareza por constancia y progreso, sin azar), álbum de colección, amigos sin servidor (tarjetas compartidas a mano) y un único color naranja pastel.
 
 Fase 2: bienvenida y bloqueo (PIN de 6 dígitos, huella opcional, bloqueo automático, ocultar contenido), copias cifradas con
 contraseña, rediseño con animaciones, gráfica de evolución, iconos por objetivo, niveles, logros y retos opcionales.
