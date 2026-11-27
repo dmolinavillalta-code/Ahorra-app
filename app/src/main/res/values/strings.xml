@@ -307,7 +307,7 @@
     <string name="pets_intro">Cada objetivo tiene un compañero. Evoluciona con tu constancia y tu progreso: nunca con azar ni con dinero.</string>
     <string name="pets_companions">Tus compañeros</string>
     <string name="pets_next_form">Próxima fase: %1$s</string>
-    <string name="pets_unknown">???</string>
+    <string name="pets_unknown">¿?</string>
     <string name="rarity_common">Común</string>
     <string name="rarity_rare">Rara</string>
     <string name="rarity_epic">Épica</string>

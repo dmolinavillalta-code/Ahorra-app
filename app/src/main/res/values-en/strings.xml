@@ -298,7 +298,7 @@
     <string name="pets_intro">Every goal has a companion. It evolves with your consistency and progress: never by chance or with money.</string>
     <string name="pets_companions">Your companions</string>
     <string name="pets_next_form">Next form: %1$s</string>
-    <string name="pets_unknown">???</string>
+    <string name="pets_unknown">?</string>
     <string name="rarity_common">Common</string>
     <string name="rarity_rare">Rare</string>
     <string name="rarity_epic">Epic</string>
